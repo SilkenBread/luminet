@@ -1,0 +1,84 @@
+{% extends 'body.html' %}
+{% load widget_tweaks %}
+
+{% block content_main %}
+    <form method="post"  id='formulario' action="." enctype="multipart/form-data">
+        <div class="card card-dark">
+            <div class="card-header" style='text-align:center;'>
+                <h4 class="card-title text-align-center">
+                    {% if action == 'add' %}
+                        <i class="fas fa-plus"></i>
+                    {% else %}
+                    <i class="fa-regular fa-pen-to-square"></i>
+                    {% endif %}
+
+                    <strong>{{ title }}</strong>
+                </h4>
+            </div>
+            <div class="card-body">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{{ action }}">
+                {% if form.errors %}
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h5><i class="icon fas fa-ban"></i> Ha ocurrido un error al querer guardar el registro</h5>
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                <div class="row">
+                {% for field in form.visible_fields %}
+                    <div class="form-group col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                        <label for="">{{ field.label }}:</label>
+                        {{ field|add_class:'form-control'|attr:'autocomplete:off' }}
+                        <br>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-outline-primary m-1">
+                    <i data-lucide="save"></i> Guardar registro
+                </button>
+                <a href="{{ list_url }}" class="btn btn-outline-success m-1">
+                    <i data-lucide="x"></i> Cancelar
+                </a>
+            </div>
+        </div>
+    </form>
+    {% block script %}
+        <script>
+            {% if form.errors %}
+                var errors = '';
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        errors += '{{ error }}\n';
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    errors += '{{ error }}\n';
+                {% endfor %}
+                Swal.fire({
+                    title: 'Error!',
+                    text: errors,
+                    icon: 'error'
+                });
+            {% endif %}
+
+            $('form').on('submit', function (e) {
+                e.preventDefault();
+                //se usa cuando no se envia por AJAX
+                //var parameters = $(this).serializeArray();
+                var parameters = new FormData(this);
+                submit_with_ajax(window.location.pathname, 'Notificación', '¿Estas seguro de realizar la siguiente acción?', parameters, function () {
+                    location.href = '{{ list_url }}';
+                });
+            });
+        </script>
+    {% endblock %}
+{% endblock content_main %}

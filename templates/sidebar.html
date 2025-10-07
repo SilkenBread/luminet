@@ -1,0 +1,119 @@
+{% load static %}
+
+{% block sidebar %}
+
+<aside id="sidebar" tabindex="-1" class="d-flex flex-column shadow bg-body-tertiary h-100">
+    <div id="sidebarHeader" class="p-1 d-flex justify-content center align-items-center offcanvas-header" href="#">
+        <a href={% url "core:home"%}> <img alt="" width="100%" class="imageContent"></a>
+        <button id="iconContent" class="btn"><i data-lucide="panel-left-open"></i></button>
+    </div>
+    <hr class="m-1">
+    <ul class="sidebar-menu flex-grow-1 overflow-auto" style="padding:0; margin:0;">
+        <!-- INICIO -->
+        {# Renderiza el menú dinámico usando el snippet recursivo #}
+        {% include 'menus/menu_snippet.html' with items=main_menu_items %}
+
+        <!-- MODO OSCURO -->
+        <li class="textSidebar">
+            <a class="nav-customitem d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i data-lucide="moon"></i>
+                    <label class="form-check-label ms-2" for="switchTheme">Modo Oscuro</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input customCheckBox" type="checkbox" role="switch" id="switchTheme">
+                </div>
+            </a>
+        </li>
+    </ul>
+    
+    <div id="sidebarFooter" class="container">
+        <div class="row" id="info_profile">
+            <div class="p-1 col-3 d-flex justify-content-center align-items-center">
+                <img src={{ user.get_avatar }} alt="" width="40" height="40" class="rounded-circle">
+            </div>
+            <div class="p-1 col-9 d-flex justify-content-between align-items-center">
+                <div>
+                    <strong class="nav-link-font">{{ user.get_short_name }}</strong>
+                    {% if request.user.groups.first != None %}
+                        <span>{{ request.user.groups.first }}</span>
+                    {% endif %}
+                </div>
+                <a href="{% url "login:logout" %}" class="d-flex align-items-center" data-bs-toggle="tooltip" title="Cerrar sesión">
+                    <i data-lucide="log-out" class="custom-logout-icon"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</aside>
+{% endblock sidebar %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const themeSwitch = document.getElementById('switchTheme');
+
+        // Check the current theme and set the switch state
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            themeSwitch.checked = true;
+        } else {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+        }
+
+        themeSwitch.addEventListener('change', () => {
+            if (themeSwitch.checked) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    });
+</script>
+<script>
+    $(() => {
+        let sidebarOpen = false;
+    
+        // Resaltar enlace activo según la ruta actual
+        const currentPath = "{{ list_url }}";
+        $(".nav-customitem").each(function () {
+            const isActive = $(this).attr("href") === currentPath;
+            $(this).toggleClass("active", isActive);
+        });
+    
+        // Mostrar/Ocultar el sidebar
+        $('#iconContent').click(() => {
+            sidebarOpen = !sidebarOpen;
+            $('#sidebar').css('width', sidebarOpen ? '220px' : '0px');
+            $('.textSidebar').css('display', sidebarOpen ? 'block' : 'none');
+        });
+    });
+    
+    // Nuevo: Rotar flecha en submenús usando eventos de Bootstrap Collapse (soporta submenús anidados)
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.submenu').forEach(function (submenu) {
+            submenu.addEventListener('show.bs.collapse', function (e) {
+                e.stopPropagation();
+                // Busca el trigger que abre este submenu
+                const trigger = document.querySelector(`[data-bs-target='#${submenu.id}']`);
+                if (trigger) {
+                    const arrow = trigger.querySelector('.arrow-icon');
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(90deg)';
+                    }
+                }
+            });
+            submenu.addEventListener('hide.bs.collapse', function (e) {
+                e.stopPropagation();
+                const trigger = document.querySelector(`[data-bs-target='#${submenu.id}']`);
+                if (trigger) {
+                    const arrow = trigger.querySelector('.arrow-icon');
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        });
+    });
+</script>

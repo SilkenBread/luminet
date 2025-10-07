@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body %}
+<body>
+    {% include 'sidebar.html' %}
+    <main style="position: relative;"> 
+        <div class="container1">
+            <header class="row">
+                <ol class="col col-12 breadcrumb float-sm-right justify-content-end">
+                    <li class="breadcrumb-item">
+                        <a class="text-decoration-none text-muted" href="{% url 'core:dashboard' %}">
+                            Inicio
+                        </a>
+                    </li>
+                    {% if module %}
+                    <li class="breadcrumb-item">
+                        <a class="text-decoration-none text-muted">
+                            <i class="fas fa-folder-tree"></i> {{ module }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if entity %}
+                    <li class="breadcrumb-item">
+                        <a class="text-decoration-none" style="color: orange;" href="{{ list_url }}">
+                            {{ entity }}
+                        </a>
+                    </li>
+                    {% endif %}
+                </ol>
+            </header>
+            {% block content_main %}
+            {% endblock content_main %}
+        </div>
+    </main>
+    <script>
+        lucide.createIcons();
+        $(document).ready(()=> {
+            var status = false;
+            $('#actionSidebar').click(() => {
+                if(status == false){
+                    $('#sidebar').css('width', '220px');
+                    $('.textSidebar').css('display','block');
+                    status = true
+                } else {
+                   
+                    $('#sidebar').css('width', '60px');
+                    $('.textSidebar').css('display','none');
+                    status = false
+                    
+                }
+            });
+        })
+      {% if messages %}
+          var html = '<p>';
+          {% for message in messages %}
+              html += '{{ message }}<br>';
+          {% endfor %}
+          html += '</p>';
+          Swal.fire({
+              title: 'Error!',
+              html: html,
+              icon: 'error',
+              confirmButtonColor:'#db1418',
+          });
+      {% endif %}
+  </script>
+    {% block extra_body_content %}{% endblock extra_body_content %}
+</body>
+{% endblock body %}

@@ -1,0 +1,71 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block content_main %}
+    <!--LOADER-->
+    {% block loader %}
+        {% include 'loader.html' %}
+    {% endblock loader %}
+    <h2 style="text-align:center;">
+        {{ title }}
+    </h2>
+        <div class="card-body">
+            <div class="container-fluid">
+                <button action="action" class="btn btn-outline-secondary m-1" onclick="window.history.go(-1); return false;" data-bs-toggle="tooltip" title="Volver">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <a id="reloadTable" class="btn btn-outline-success m-1" data-bs-toggle="tooltip" title="Actualizar">
+                    <i data-lucide="rotate-cw"></i>
+                </a>
+                {% block content_list %}
+                    {% if massive_actions_options %}
+                        <form method="post" id="massive-actions-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="select_all_mode" id="select_all_mode" value="false">
+                            <div class="d-flex flex-wrap align-items-center gap-3 p-3 bg-light rounded shadow-sm border mb-3">
+                                <label for="massive_actions" class="form-label mb-0 fw-semibold">Acciones masivas:</label>
+                                <select class="form-select w-auto" name="massive_actions" id="massive_actions">
+                                    <option value="">Seleccionar acción</option>
+                                    {% for value, label in massive_actions_options %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-success d-flex align-items-center gap-1">
+                                    <i data-lucide="play"></i> Ejecutar
+                                </button>
+                            </div>
+                        {% endif %}
+                {% endblock %}
+                <table style="width:100%;" class="table table-hover table-borderless" id="data">
+                            <thead>
+                                <tr>
+                                    {% block columns %}{% endblock %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% block rows %}{% endblock %}
+                            </tbody>
+                        </table>
+            </div>
+        </div>
+        {% block card_footer %}
+            <div class="card-footer">
+                {% if create_url %}
+                    <a href="{{ create_url }}" class="btn btn-outline-primary m-1">
+                        <i data-lucide="plus"></i> Nuevo Registro
+                    </a>
+                {% endif %}
+            </div>
+        {% endblock %}
+
+{% endblock %}
+
+{% block assets %}
+    <!--Datatables-->
+    {% include 'sections/scriptDatatable.html' %}
+    <script src="{% static 'js/datatables/global.js' %}"></script>
+    
+    {% block data_scripts %}{% endblock %}
+    {% block assets_list %}
+    {% endblock %}
+{% endblock assets %}
