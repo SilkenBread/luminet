@@ -1,0 +1,14 @@
+@media screen and (max-width: 1000px) {
+    .imageContent {
+        width: 100% !important;
+    }
+}
+.custom-link {
+    color: #f19124; /* Cambia este valor al color que desees */
+    text-decoration: none;
+}
+
+.custom-link:hover {
+    color: #d17a1a; /* Cambia este valor al color que desees para el hover */
+    text-decoration: underline;
+}

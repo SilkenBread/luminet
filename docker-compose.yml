@@ -1,0 +1,64 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: luminet:latest
+    container_name: luminet
+    restart: unless-stopped
+    
+    # Variables de entorno desde archivo .env
+    env_file:
+      - .env
+    
+    environment:
+      # Django
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - PYTHONUNBUFFERED=1
+      
+      # Timezone
+      - TZ=America/Bogota
+      
+      # Producción (sobrescribir si es necesario)
+      - DEBUG=${DEBUG:-False}
+      
+    # Para desarrollo, usa runserver; para producción, usa gunicorn (comando por defecto del Dockerfile)
+    command: python manage.py runserver 0.0.0.0:8000
+    
+    volumes:
+      # Desarrollo: monta el código para hot-reload
+      - .:/luminet:delegated
+      
+      # Mantener archivos estáticos y media persistentes
+      - static_volume:/luminet/staticfiles
+      - media_volume:/luminet/media
+      
+      # No sobrescribir db.sqlite3 si existe en el contenedor
+      - ./db.sqlite3:/luminet/db.sqlite3
+    
+    ports:
+      - "${PORT:-8082}:8000"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - luminet-network
+
+# Volúmenes nombrados para persistencia
+volumes:
+  static_volume:
+    name: luminet_static
+  media_volume:
+    name: luminet_media
+
+# Red personalizada
+networks:
+  luminet-network:
+    name: luminet_network
+    driver: bridge

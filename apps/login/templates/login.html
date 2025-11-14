@@ -1,0 +1,90 @@
+{% extends 'components/generic_access.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+
+{% block right_body %}
+<div class="d-flex flex-column min-vh-100">
+    <div class="d-flex flex-column justify-content-center flex-grow-1">
+        <div class="text-center">
+            <a href={% url "core:home"%}>
+                <img alt="Logo Login" width="70%" class="imageContent"/>
+            </a>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9">
+                <form id="login_form" class="p-5 m-3" action="." method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <!-- Username input -->
+                    <div class="form-floating my-3">
+                        {{ form.username|add_class:'form-control' }}
+                        <label for="{{ form.username.name }}">{{ form.username.label }}</label>
+                    </div>
+                    <!-- Password input -->
+                    <div class="form-floating my-3">
+                        {{ form.password|add_class:'form-control'}}
+                        <label for="{{ form.password.name }}">{{ form.password.label }}</label>
+                    </div>
+                    <div class="my-4 row">
+                        <div class="col col-sm-6">
+                            <!-- Checkbox -->
+                            <div class="form-check form-switch">
+                                <input class="form-check-input customCheckBox" type="checkbox" id="showPassword">
+                                <label class="form-check-label" for="showPassword">Mostrar Contraseña </label>
+                            </div>
+                        </div>
+                        <div class="col col-sm-6 text-end">
+                            <a class="custom-link" href="{% url 'login:reset_password' %}">¿Olvidaste tu contraseña?</a>
+                        </div>
+                    </div>
+                    <!-- Submit button -->
+                    <div class="d-grid gap-2 col-6 mx-auto">
+                        <button type="submit" class="btn custom-button" type="button">Iniciar sesión {% include 'svg/log-in.html' %}</button>
+                    </div>           
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="mt-auto">
+        <div class="text-center p-4">
+            <span class="text-muted fs-6"><i class="fa-regular fa-copyright"></i> 2025. Desarrollado porß Juan David Rodriguez Rubio</span>
+        </div>
+    </div>
+</div>
+{% endblock right_body %}
+
+{% block assets %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/generic_access.css' %}">
+
+<script type="application/javascript">
+    const passwordInput = document.getElementById('id_password');
+    const showPasswordCheckbox = document.getElementById('showPassword');
+
+    showPasswordCheckbox.addEventListener('change', function () {
+        if (showPasswordCheckbox.checked) {
+            passwordInput.type = 'text';
+        } else {
+            passwordInput.type = 'password';
+        }
+    });
+
+    {% if form.errors %}
+        var errors = '';
+        {% for field in form %}
+            {% for error in field.errors %}
+                errors += '{{ error }}\n';
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            errors += '{{ error }}\n';
+        {% endfor %}
+        Swal.fire({
+            title: 'Error!',
+            text: errors,
+            icon: 'error',
+            confirmButtonColor:'#db1418',
+        });
+    {% endif %}
+</script>
+{% endblock assets %}

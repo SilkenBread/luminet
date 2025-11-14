@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% load user_agents %}
+
+{% block body %}
+<style>
+    body {
+        overflow-y: hidden; /* Hide vertical scrollbar */
+        overflow-x: hidden; /* Hide horizontal scrollbar */
+    }
+    @media screen and (max-width: 1000px) {
+        #left-side {
+            display: none;
+        }
+        #right-side {
+            width: 100% !important;
+        }
+    }
+</style>
+<body>
+    <main>
+        <div style='display:flex; justify-content:center; height: 100vh; align-items: center; overflow-y: hidden; '>
+            <div id="left-side" class="w-50 hidden-sm">
+                <video id="image-login" autoplay loop muted width="100%" height="100%">
+                    {% if not request|is_mobile %}
+                        <source src="{% static 'media/highway.mp4' %}" type="video/mp4">
+                    {% endif %}
+                </video>
+            </div>
+            <div id="right-side" class="w-50 d-flex align-items-center justify-content-center">
+                {% block right_body %}
+                {% endblock right_body %}
+            </div>
+        </div>
+    </main>
+</body>
+{% endblock %}
+
+{% block assets %}
+{% endblock assets %}

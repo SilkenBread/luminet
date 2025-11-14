@@ -16,7 +16,7 @@
     class="py-5 px-10 flex items-center fixed top-0 w-full justify-between text-white z-50"
   >
     <div id="header" class=" flex flex-grow basis-0">
-      <h1 class="text-lg hidden">Cityglow</h1>
+      <h1 class="text-lg hidden">Luminet</h1>
       <img src={% static "svg/logo_bg_black.svg" %} class="w-64" />
     </div>
 
@@ -24,7 +24,7 @@
       {% if user.is_authenticated %}
       <a class="flex gap-2" href="#">Ir al Inicio <i data-lucide="arrow-down-right"></i></a>
       {% else %}
-      <a class="flex gap-2" href="#">Iniciar Sesión <i data-lucide="log-in"></i></a>
+      <a class="flex gap-2" href={% url "login:login" %}>Iniciar Sesión <i data-lucide="log-in"></i></a>
       {% endif %}
     </nav>
   </header>
@@ -104,7 +104,7 @@
       <div class="flex flex-wrap items-center md:justify-between justify-center">
         <div class="w-full md:w-4/12 px-4 mx-auto text-center">
           <div class="text-sm text-blueGray-500 font-semibold py-1">
-             © Desarrollado por UDPS(Unidad de Desarrollo de Productos y Servicios) de <a href="https://www.emcali.com.co/web/telco/" class="text-blueGray-500 hover:text-gray-600" target="_blank">EMCALI Telecomunicaciones</a> | Todos los derechos reservados. <span id="get-current-year">2024</span>
+             © Desarrollado por <a href="https://www.linkedin.com/in/juan-david-rodriguez-rubio-a1445321b/" class="text-blueGray-500 hover:text-gray-600" target="_blank">Juan David Rodriguez Rubio</a> | Todos los derechos reservados. <span id="get-current-year">2025</span>
           </div>
         </div>
       </div>
