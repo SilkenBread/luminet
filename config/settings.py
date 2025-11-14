@@ -38,15 +38,12 @@ THIRD_PARTY_APPS = [
     "leaflet",
     "colorfield",
 ]
-LOCAL_APPS = [
-    "apps.core",
-    "apps.users",
-    "apps.login",
-]
+LOCAL_APPS = ["apps.core", "apps.users", "apps.login", "apps.menus"]
 
 INSTALLED_APPS = BASE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

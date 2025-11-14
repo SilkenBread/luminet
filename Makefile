@@ -26,6 +26,16 @@ shell: ## Abrir shell en el contenedor
 django-shell: ## Abrir Django shell
 	docker-compose exec web python manage.py shell
 
+startapp: ## Crear nueva app Django (uso: make startapp name=nombre_app)
+	@if [ -z "$(name)" ]; then \
+		echo "Error: Debes especificar el nombre de la app"; \
+		echo "Uso: make startapp name=nombre_app"; \
+		exit 1; \
+	fi
+	docker-compose exec web python manage.py startapp $(name)
+	@echo "✅ App '$(name)' creada en el directorio actual"
+	@echo "📝 No olvides agregar 'apps.$(name)' a INSTALLED_APPS en settings.py"
+
 migrate: ## Ejecutar migraciones
 	docker-compose exec web python manage.py migrate
 

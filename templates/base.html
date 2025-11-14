@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es" data-bs-theme="auto">
+<html lang="es" class="">
 
 <head>
     <meta charset="UTF-8">
@@ -8,19 +8,58 @@
 
     <title>{{ title }}</title>
 
-    <!-- Bootstrap5 -->
+    <!-- Tailwind CSS con configuración de modo oscuro -->
+    <script src="{% static 'lib/tailwindcss-3.4.16/tailwindcss.js' %}"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Bootstrap5 (para compatibilidad con otros templates) -->
     <link href="{% static 'lib/bootstrap-5.3.6/css/bootstrap.min.css' %}" rel="stylesheet" />
     <script src="{% static 'lib/bootstrap-5.3.6/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/color-modes.js' %}"></script>
+    
+    <!-- jQuery -->
+    <script src="{% static 'lib/jquery-3.6.0.min.js' %}"></script>
+    
+    <!-- SweetAlert2 JS -->
+    <script src="{% static 'lib/sweetalert2.min.js' %}"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="{% static 'lib/lucide-v0.513.0/lucide.min.js' %}"></script>
+    
+    <!-- Script para aplicar tema antes de renderizar (evita flash) -->
+    <script>
+        // Apply theme immediately to prevent flash
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 
+    {% block extra_css %}{% endblock %}
 </head>
 
-<body class="d-flex flex-column min-vh-100">
-    {% include 'sidebar.html' %}
-    <div class="container-fluid d-flex flex-column flex-grow-1">
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    {% if user.is_authenticated and show_sidebar %}
+        {% include 'sidebar.html' %}
+    {% endif %}
+    
+    <div class="w-full">
         {% block content %}{% endblock %}
     </div>
-    {% include 'project/modals/execution_modal.html' %}
+    
+    {% if user.is_authenticated and show_sidebar %}
+    <script>
+        // Inicializar iconos de Lucide
+        lucide.createIcons();
+    </script>
+    {% endif %}
+    
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

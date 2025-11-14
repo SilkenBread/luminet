@@ -4,23 +4,21 @@ from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-# local Django
-from apps.users.models import User
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
+        label="Nombre de usuario",
         widget=forms.TextInput(attrs={
-        'placeholder': 'Ingrese un username',
-        'class': 'form-control',
-        'autocomplete': 'off'
-        }))
+            'placeholder': 'Ingrese su nombre de usuario',
+            'autocomplete': 'off'
+        })
+    )
     password = forms.CharField(
-        label=_("Password"),
+        label=_("Contraseña"),
         widget=forms.PasswordInput(attrs={
-            'placeholder': 'Ingrese una contraseña',
-            'autocomplete': "off",
-            'class': 'form-control',
-            }),
+            'placeholder': 'Ingrese su contraseña',
+            'autocomplete': 'off'
+        }),
     )
 
 
@@ -28,29 +26,29 @@ class ResetPasswordForm(forms.Form):
     username = forms.CharField(
         label="Nombre de usuario",
         widget=forms.TextInput(attrs={
-        'placeholder': 'Ingrese un username',
-        'class': 'form-control',
-        'autocomplete': 'off',
-        'required': True
-    }))
+            'placeholder': 'Ingrese un username',
+            'autocomplete': 'off',
+            'required': True
+        })
+    )
 
 
 class ChangePasswordForm(forms.Form):
     password = forms.CharField(
+        label="Contraseña",
         widget=forms.PasswordInput(attrs={
             'placeholder': 'Ingrese una contraseña',
-            'class': 'form-control',
-            'name':'Contrasena',
+            'name': 'Contrasena',
             'autocomplete': 'off'
-            }),
+        }),
         help_text=password_validation.password_validators_help_text_html()
     )
     confirmPassword = forms.CharField(
+        label="Confirmar contraseña",
         widget=forms.PasswordInput(attrs={
             'placeholder': 'Confirma la contraseña',
-            'class': 'form-control',
             'autocomplete': 'off'
-            })
+        })
     )
 
     def clean(self):

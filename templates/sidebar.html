@@ -53,22 +53,24 @@
         const themeSwitch = document.getElementById('switchTheme');
 
         // Check the current theme and set the switch state
-        if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.setAttribute('data-bs-theme', 'dark');
-            themeSwitch.checked = true;
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            if (themeSwitch) themeSwitch.checked = true;
         } else {
-            document.documentElement.setAttribute('data-bs-theme', 'light');
+            document.documentElement.classList.remove('dark');
         }
 
-        themeSwitch.addEventListener('change', () => {
-            if (themeSwitch.checked) {
-                document.documentElement.setAttribute('data-bs-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.setAttribute('data-bs-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            }
-        });
+        if (themeSwitch) {
+            themeSwitch.addEventListener('change', () => {
+                if (themeSwitch.checked) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        }
     });
 </script>
 <script>

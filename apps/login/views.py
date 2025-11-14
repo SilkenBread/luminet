@@ -1,6 +1,5 @@
 # standard library
-import uuid, os, environ, json
-from pathlib import Path
+import json
 
 # Django
 from django.contrib.auth.views import LoginView
@@ -15,7 +14,6 @@ from django.http import HttpResponseRedirect, JsonResponse
 
 # local Django
 import config.settings as setting
-# from config import settings
 from apps.login.forms import ResetPasswordForm, ChangePasswordForm, LoginForm
 from apps.users.models import User
 from apps.utils.send_mails import GenericSendMail
@@ -39,6 +37,7 @@ class LoginFormView(LoginView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Inicio de sesión'
+        context['show_sidebar'] = False
         return context
 
 class LogoutView(RedirectView):
@@ -101,6 +100,7 @@ class CheckPasswordRecovery(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Validación para recuperación de contraseña'
+        context['show_sidebar'] = False
         return context
 
     
@@ -143,6 +143,7 @@ class ChangePasswordView(FormView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Cambio de Contraseña'
         context['login_url'] = setting.LOGIN_URL
+        context['show_sidebar'] = False
         return context
 
 
