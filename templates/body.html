@@ -1,70 +1,95 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block body %}
-<body>
-    {% include 'sidebar.html' %}
-    <main style="position: relative;"> 
-        <div class="container1">
-            <header class="row">
-                <ol class="col col-12 breadcrumb float-sm-right justify-content-end">
-                    <li class="breadcrumb-item">
-                        <a class="text-decoration-none text-muted" href="{% url 'core:dashboard' %}">
+{% block content %}
+<!-- Main content area -->
+<div class="flex-1 flex flex-col min-h-screen">
+    <!-- Header/Breadcrumb - Fijo en la parte superior -->
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
+        <div class="px-4 sm:px-6 lg:px-8 py-4">
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{% url 'core:dashboard' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 transition">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                            </svg>
                             Inicio
                         </a>
                     </li>
                     {% if module %}
-                    <li class="breadcrumb-item">
-                        <a class="text-decoration-none text-muted">
-                            <i class="fas fa-folder-tree"></i> {{ module }}
-                        </a>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">
+                                {{ module }}
+                            </span>
+                        </div>
                     </li>
                     {% endif %}
                     {% if entity %}
-                    <li class="breadcrumb-item">
-                        <a class="text-decoration-none" style="color: orange;" href="{{ list_url }}">
-                            {{ entity }}
-                        </a>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <a href="{{ list_url }}" class="ml-1 text-sm font-medium text-orange-600 hover:text-orange-700 md:ml-2">
+                                {{ entity }}
+                            </a>
+                        </div>
                     </li>
                     {% endif %}
                 </ol>
-            </header>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1 bg-gray-50 transition-colors duration-200">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {% block content_main %}
             {% endblock content_main %}
         </div>
     </main>
-    <script>
+</div>
+
+<!-- Scripts -->
+<script>
+    // Inicializar iconos de Lucide
+    if (typeof lucide !== 'undefined') {
         lucide.createIcons();
-        $(document).ready(()=> {
-            var status = false;
-            $('#actionSidebar').click(() => {
-                if(status == false){
-                    $('#sidebar').css('width', '220px');
-                    $('.textSidebar').css('display','block');
-                    status = true
-                } else {
-                   
-                    $('#sidebar').css('width', '60px');
-                    $('.textSidebar').css('display','none');
-                    status = false
-                    
-                }
-            });
-        })
-      {% if messages %}
-          var html = '<p>';
-          {% for message in messages %}
-              html += '{{ message }}<br>';
-          {% endfor %}
-          html += '</p>';
-          Swal.fire({
-              title: 'Error!',
-              html: html,
-              icon: 'error',
-              confirmButtonColor:'#db1418',
-          });
-      {% endif %}
-  </script>
-    {% block extra_body_content %}{% endblock extra_body_content %}
-</body>
-{% endblock body %}
+    }
+
+    // Sidebar toggle functionality
+    $(document).ready(() => {
+        let sidebarOpen = false;
+        
+        $('#actionSidebar, #iconContent').click(() => {
+            sidebarOpen = !sidebarOpen;
+            $('#sidebar').css('width', sidebarOpen ? '220px' : '60px');
+            $('.textSidebar').css('display', sidebarOpen ? 'block' : 'none');
+        });
+    });
+
+    // Display Django messages
+    {% if messages %}
+        let html = '<div class="space-y-2">';
+        {% for message in messages %}
+            html += '<p class="text-sm">{{ message }}</p>';
+        {% endfor %}
+        html += '</div>';
+        
+        Swal.fire({
+            title: 'Notificación',
+            html: html,
+            icon: '{{ messages.tags|default:"info" }}',
+            confirmButtonColor: '#3b82f6',
+            confirmButtonText: 'Entendido'
+        });
+    {% endif %}
+</script>
+
+{% block extra_body_content %}{% endblock extra_body_content %}
+{% endblock content %}

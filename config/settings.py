@@ -38,7 +38,7 @@ THIRD_PARTY_APPS = [
     "leaflet",
     "colorfield",
 ]
-LOCAL_APPS = ["apps.core", "apps.users", "apps.login", "apps.menus"]
+LOCAL_APPS = ["apps.core", "apps.users", "apps.login"]
 
 INSTALLED_APPS = BASE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

@@ -1,71 +1,172 @@
-{% extends 'body.html' %}
-{% load static %}
+{% extends 'body.html' %}{% extends 'body.html' %}
 
-{% block content_main %}
-    <!--LOADER-->
-    {% block loader %}
-        {% include 'loader.html' %}
-    {% endblock loader %}
+{% load static %}{% load static %}
+
+
+
+{% block content_main %}{% block content_main %}
+
+<!-- Page Title -->    <!--LOADER-->
+
+<div class="mb-6">    {% block loader %}
+
+    <h2 class="text-2xl font-bold text-gray-900">{{ title }}</h2>        {% include 'loader.html' %}
+
+</div>    {% endblock loader %}
+
     <h2 style="text-align:center;">
-        {{ title }}
-    </h2>
-        <div class="card-body">
-            <div class="container-fluid">
-                <button action="action" class="btn btn-outline-secondary m-1" onclick="window.history.go(-1); return false;" data-bs-toggle="tooltip" title="Volver">
-                    <i data-lucide="arrow-left"></i>
-                </button>
-                <a id="reloadTable" class="btn btn-outline-success m-1" data-bs-toggle="tooltip" title="Actualizar">
-                    <i data-lucide="rotate-cw"></i>
-                </a>
-                {% block content_list %}
-                    {% if massive_actions_options %}
-                        <form method="post" id="massive-actions-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="select_all_mode" id="select_all_mode" value="false">
-                            <div class="d-flex flex-wrap align-items-center gap-3 p-3 bg-light rounded shadow-sm border mb-3">
-                                <label for="massive_actions" class="form-label mb-0 fw-semibold">Acciones masivas:</label>
-                                <select class="form-select w-auto" name="massive_actions" id="massive_actions">
-                                    <option value="">Seleccionar acción</option>
-                                    {% for value, label in massive_actions_options %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" class="btn btn-success d-flex align-items-center gap-1">
-                                    <i data-lucide="play"></i> Ejecutar
-                                </button>
-                            </div>
-                        {% endif %}
-                {% endblock %}
-                <table style="width:100%;" class="table table-hover table-borderless" id="data">
-                            <thead>
-                                <tr>
-                                    {% block columns %}{% endblock %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% block rows %}{% endblock %}
-                            </tbody>
-                        </table>
-            </div>
-        </div>
-        {% block card_footer %}
-            <div class="card-footer">
-                {% if create_url %}
-                    <a href="{{ create_url }}" class="btn btn-outline-primary m-1">
-                        <i data-lucide="plus"></i> Nuevo Registro
-                    </a>
-                {% endif %}
-            </div>
-        {% endblock %}
 
+<!-- Action Buttons -->        {{ title }}
+
+<div class="mb-6 flex flex-wrap gap-3">    </h2>
+
+    <button onclick="window.history.go(-1); return false;"         <div class="card-body">
+
+            class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg shadow-sm transition-colors duration-200"            <div class="container-fluid">
+
+            title="Volver">                <button action="action" class="btn btn-outline-secondary m-1" onclick="window.history.go(-1); return false;" data-bs-toggle="tooltip" title="Volver">
+
+        <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">                    <i data-lucide="arrow-left"></i>
+
+            <line x1="19" y1="12" x2="5" y2="12"></line>                </button>
+
+            <polyline points="12 19 5 12 12 5"></polyline>                <a id="reloadTable" class="btn btn-outline-success m-1" data-bs-toggle="tooltip" title="Actualizar">
+
+        </svg>                    <i data-lucide="rotate-cw"></i>
+
+        Volver                </a>
+
+    </button>                {% block content_list %}
+
+                        {% if massive_actions_options %}
+
+    <button id="reloadTable"                         <form method="post" id="massive-actions-form">
+
+            class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200"                            {% csrf_token %}
+
+            title="Actualizar">                            <input type="hidden" name="select_all_mode" id="select_all_mode" value="false">
+
+        <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">                            <div class="d-flex flex-wrap align-items-center gap-3 p-3 bg-light rounded shadow-sm border mb-3">
+
+            <polyline points="23 4 23 10 17 10"></polyline>                                <label for="massive_actions" class="form-label mb-0 fw-semibold">Acciones masivas:</label>
+
+            <polyline points="1 20 1 14 7 14"></polyline>                                <select class="form-select w-auto" name="massive_actions" id="massive_actions">
+
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>                                    <option value="">Seleccionar acción</option>
+
+        </svg>                                    {% for value, label in massive_actions_options %}
+
+        Actualizar                                        <option value="{{ value }}">{{ label }}</option>
+
+    </button>                                    {% endfor %}
+
+                                </select>
+
+    {% if create_url %}                                <button type="submit" class="btn btn-success d-flex align-items-center gap-1">
+
+    <a href="{{ create_url }}"                                     <i data-lucide="play"></i> Ejecutar
+
+       class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">                                </button>
+
+        <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">                            </div>
+
+            <line x1="12" y1="5" x2="12" y2="19"></line>                        {% endif %}
+
+            <line x1="5" y1="12" x2="19" y2="12"></line>                {% endblock %}
+
+        </svg>                <table style="width:100%;" class="table table-hover table-borderless" id="data">
+
+        Nuevo Registro                            <thead>
+
+    </a>                                <tr>
+
+    {% endif %}                                    {% block columns %}{% endblock %}
+
+</div>                                </tr>
+
+                            </thead>
+
+<!-- Massive Actions Form -->                            <tbody>
+
+{% block content_list %}                                {% block rows %}{% endblock %}
+
+{% if massive_actions_options %}                            </tbody>
+
+<form method="post" id="massive-actions-form" class="mb-6">                        </table>
+
+    {% csrf_token %}            </div>
+
+    <input type="hidden" name="select_all_mode" id="select_all_mode" value="false">        </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">        {% block card_footer %}
+
+        <div class="flex flex-wrap items-center gap-4">            <div class="card-footer">
+
+            <label for="massive_actions" class="text-sm font-semibold text-gray-700">                {% if create_url %}
+
+                Acciones masivas:                    <a href="{{ create_url }}" class="btn btn-outline-primary m-1">
+
+            </label>                        <i data-lucide="plus"></i> Nuevo Registro
+
+            <select class="px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"                     </a>
+
+                    name="massive_actions"                 {% endif %}
+
+                    id="massive_actions">            </div>
+
+                <option value="">Seleccionar acción</option>        {% endblock %}
+
+                {% for value, label in massive_actions_options %}
+
+                    <option value="{{ value }}">{{ label }}</option>{% endblock %}
+
+                {% endfor %}
+
+            </select>{% block assets %}
+
+            <button type="submit"     <!--Datatables-->
+
+                    class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">    {% include 'sections/scriptDatatable.html' %}
+
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">    <script src="{% static 'js/datatables/global.js' %}"></script>
+
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>    
+
+                </svg>    {% block data_scripts %}{% endblock %}
+
+                Ejecutar    {% block assets_list %}
+
+            </button>    {% endblock %}
+
+        </div>{% endblock assets %}
+    </div>
+</form>
+{% endif %}
 {% endblock %}
 
-{% block assets %}
-    <!--Datatables-->
-    {% include 'sections/scriptDatatable.html' %}
-    <script src="{% static 'js/datatables/global.js' %}"></script>
-    
-    {% block data_scripts %}{% endblock %}
-    {% block assets_list %}
-    {% endblock %}
-{% endblock assets %}
+<!-- Data Table Card -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+    <div class="overflow-x-auto">
+        <table style="width:100%;" class="min-w-full divide-y divide-gray-200" id="data">
+            <thead class="bg-gray-50">
+                <tr>
+                    {% block columns %}{% endblock %}
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% block rows %}{% endblock %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock content_main %}
+
+{% block extra_body_content %}
+<!-- Datatables -->
+{% include 'sections/scriptDatatable.html' %}
+<script src="{% static 'js/datatables/global.js' %}"></script>
+
+{% block data_scripts %}{% endblock %}
+{% block assets_list %}{% endblock %}
+{% endblock %}

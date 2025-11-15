@@ -1,0 +1,76 @@
+/* Estilos adicionales para el Sidebar con Tailwind */
+
+/* Asegurar que el sidebar se vea correctamente */
+#sidebar {
+    transition: width 0.3s ease-in-out;
+    overflow-x: hidden;
+}
+
+/* Ocultar el texto del sidebar cuando está colapsado */
+#sidebar:not([style*="width: 220px"]) .textSidebar {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Mostrar el texto del sidebar cuando está expandido */
+#sidebar[style*="width: 220px"] .textSidebar {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.2s ease-in-out 0.1s;
+}
+
+/* Mejorar la visualización del avatar */
+#info_profile img {
+    flex-shrink: 0;
+}
+
+/* Hover effects para los items del menú */
+.nav-customitem {
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+
+.nav-customitem.active {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-left: 3px solid #2563eb;
+}
+
+/* Mejorar la transición del sidebar */
+.textSidebar {
+    transition: opacity 0.2s ease-in-out;
+    white-space: nowrap;
+}
+
+/* Asegurar que el contenido no se desborde */
+#sidebar * {
+    box-sizing: border-box;
+}
+
+/* Estilos para submenús */
+.submenu {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+/* Estilos para las flechas de submenús */
+.arrow-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Scrollbar personalizado */
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: #f3f4f6;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}

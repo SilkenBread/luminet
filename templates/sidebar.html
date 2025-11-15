@@ -1,121 +1,119 @@
 {% load static %}
 
 {% block sidebar %}
-
-<aside id="sidebar" tabindex="-1" class="d-flex flex-column shadow bg-body-tertiary h-100">
-    <div id="sidebarHeader" class="p-1 d-flex justify-content center align-items-center offcanvas-header" href="#">
-        <a href={% url "core:home"%}> <img alt="" width="100%" class="imageContent"></a>
-        <button id="iconContent" class="btn"><i data-lucide="panel-left-open"></i></button>
-    </div>
-    <hr class="m-1">
-    <ul class="sidebar-menu flex-grow-1 overflow-auto" style="padding:0; margin:0;">
-        <!-- INICIO -->
-        {# Renderiza el menú dinámico usando el snippet recursivo #}
-        {% include 'menus/menu_snippet.html' with items=main_menu_items %}
-
-        <!-- MODO OSCURO -->
-        <li class="textSidebar">
-            <a class="nav-customitem d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                    <i data-lucide="moon"></i>
-                    <label class="form-check-label ms-2" for="switchTheme">Modo Oscuro</label>
-                </div>
-                <div class="form-check form-switch">
-                    <input class="form-check-input customCheckBox" type="checkbox" role="switch" id="switchTheme">
-                </div>
-            </a>
-        </li>
-    </ul>
+<!-- Sidebar con Tailwind CSS -->
+<aside id="sidebar" class="flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out h-screen sticky top-0 flex-shrink-0" style="width: 60px; min-width: 60px;">
     
-    <div id="sidebarFooter" class="container">
-        <div class="row" id="info_profile">
-            <div class="p-1 col-3 d-flex justify-content-center align-items-center">
-                <img src={{ user.get_avatar }} alt="" width="40" height="40" class="rounded-circle">
+    <!-- Sidebar Header -->
+    <div id="sidebarHeader" class="p-3 flex items-center justify-between border-b border-gray-200 flex-shrink-0 transition-colors duration-200">
+        <a href="{% url 'core:home' %}" class="flex items-center textSidebar overflow-hidden" style="display: none;">
+            <span class="text-lg font-bold text-gray-800 whitespace-nowrap">Luminet</span>
+        </a>
+        
+        <button id="iconContent" class="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-shrink-0">
+            <svg class="w-6 h-6 text-gray-600 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Divider -->
+    <hr class="border-gray-200 flex-shrink-0 transition-colors duration-200">
+
+    <!-- Sidebar Menu -->
+    <ul class="flex-1 overflow-y-auto py-2 space-y-1 px-2">
+    </ul>
+
+    <!-- Sidebar Footer - User Profile -->
+    <div id="sidebarFooter" class="border-t border-gray-200 p-3 flex-shrink-0 transition-colors duration-200">
+        <div id="info_profile" class="flex items-center space-x-3">
+            <div class="flex-shrink-0">
+                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.4" d="M12.1207 12.78C12.0507 12.77 11.9607 12.77 11.8807 12.78C10.1207 12.72 8.7207 11.28 8.7207 9.50998C8.7207 7.69998 10.1807 6.22998 12.0007 6.22998C13.8107 6.22998 15.2807 7.69998 15.2807 9.50998C15.2707 11.28 13.8807 12.72 12.1207 12.78Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path opacity="0.34" d="M18.7398 19.3801C16.9598 21.0101 14.5998 22.0001 11.9998 22.0001C9.39977 22.0001 7.03977 21.0101 5.25977 19.3801C5.35977 18.4401 5.95977 17.5201 7.02977 16.8001C9.76977 14.9801 14.2498 14.9801 16.9698 16.8001C18.0398 17.5201 18.6398 18.4401 18.7398 19.3801Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </div>
-            <div class="p-1 col-9 d-flex justify-content-between align-items-center">
-                <div>
-                    <strong class="nav-link-font">{{ user.get_short_name }}</strong>
-                    {% if request.user.groups.first != None %}
-                        <span>{{ request.user.groups.first }}</span>
-                    {% endif %}
-                </div>
-                <a href="{% url "login:logout" %}" class="d-flex align-items-center" data-bs-toggle="tooltip" title="Cerrar sesión">
-                    <i data-lucide="log-out" class="custom-logout-icon"></i>
+            
+            <div class="flex-1 min-w-0 textSidebar overflow-hidden" style="display: none;">
+                <p class="text-sm font-semibold text-gray-900 truncate transition-colors duration-200">
+                    {{ user.get_short_name }}
+                </p>
+                {% if request.user.groups.first %}
+                <p class="text-xs text-gray-500 truncate transition-colors duration-200">
+                    {{ request.user.groups.first }}
+                </p>
+                {% endif %}
+            </div>
+            
+            <div class="textSidebar flex-shrink-0" style="display: none;">
+                <a href="{% url 'login:logout' %}" class="p-2 rounded-lg hover:bg-red-50 transition-colors duration-200 group inline-block" title="Cerrar sesión">
+                    <svg class="w-5 h-5 text-gray-500 group-hover:text-red-600 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
                 </a>
             </div>
         </div>
     </div>
 </aside>
-{% endblock sidebar %}
 
+<!-- Scripts del Sidebar -->
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const themeSwitch = document.getElementById('switchTheme');
-
-        // Check the current theme and set the switch state
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            if (themeSwitch) themeSwitch.checked = true;
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
-        if (themeSwitch) {
-            themeSwitch.addEventListener('change', () => {
-                if (themeSwitch.checked) {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('theme', 'light');
-                }
-            });
-        }
-    });
-</script>
-<script>
-    $(() => {
-        let sidebarOpen = false;
+// Toggle Sidebar
+$(document).ready(function () {
+    let sidebarOpen = false;
     
-        // Resaltar enlace activo según la ruta actual
-        const currentPath = "{{ list_url }}";
-        $(".nav-customitem").each(function () {
-            const isActive = $(this).attr("href") === currentPath;
-            $(this).toggleClass("active", isActive);
-        });
-    
-        // Mostrar/Ocultar el sidebar
-        $('#iconContent').click(() => {
-            sidebarOpen = !sidebarOpen;
-            $('#sidebar').css('width', sidebarOpen ? '220px' : '0px');
-            $('.textSidebar').css('display', sidebarOpen ? 'block' : 'none');
-        });
+    // Resaltar enlace activo según la ruta actual
+    const currentPath = "{{ list_url }}";
+    $(".nav-customitem").each(function () {
+        const isActive = $(this).attr("href") === currentPath;
+        $(this).toggleClass("active", isActive);
     });
     
-    // Nuevo: Rotar flecha en submenús usando eventos de Bootstrap Collapse (soporta submenús anidados)
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.submenu').forEach(function (submenu) {
-            submenu.addEventListener('show.bs.collapse', function (e) {
+    // Mostrar/Ocultar el sidebar
+    $('#iconContent').click(function() {
+        sidebarOpen = !sidebarOpen;
+        $('#sidebar').css('width', sidebarOpen ? '220px' : '60px');
+        $('.textSidebar').css('display', sidebarOpen ? 'block' : 'none');
+    });
+});
+
+// Rotar flechas en submenús (sin Bootstrap)
+document.addEventListener('DOMContentLoaded', function () {
+    // Buscar todos los elementos con clase submenu
+    document.querySelectorAll('.submenu').forEach(function(submenu) {
+        // Encontrar el botón que controla este submenú
+        const trigger = document.querySelector(`[data-submenu-target='${submenu.id}']`);
+        
+        if (trigger) {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
                 e.stopPropagation();
-                // Busca el trigger que abre este submenu
-                const trigger = document.querySelector(`[data-bs-target='#${submenu.id}']`);
-                if (trigger) {
-                    const arrow = trigger.querySelector('.arrow-icon');
+                
+                const arrow = trigger.querySelector('.arrow-icon');
+                const isHidden = submenu.classList.contains('hidden');
+                
+                if (isHidden) {
+                    // Mostrar submenú
+                    submenu.classList.remove('hidden');
                     if (arrow) {
                         arrow.style.transform = 'rotate(90deg)';
                     }
-                }
-            });
-            submenu.addEventListener('hide.bs.collapse', function (e) {
-                e.stopPropagation();
-                const trigger = document.querySelector(`[data-bs-target='#${submenu.id}']`);
-                if (trigger) {
-                    const arrow = trigger.querySelector('.arrow-icon');
+                } else {
+                    // Ocultar submenú
+                    submenu.classList.add('hidden');
                     if (arrow) {
                         arrow.style.transform = 'rotate(0deg)';
                     }
                 }
             });
-        });
+        }
     });
+});
 </script>
+{% endblock sidebar %}

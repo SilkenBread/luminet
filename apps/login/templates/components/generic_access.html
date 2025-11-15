@@ -3,39 +3,43 @@
 {% load widget_tweaks %}
 {% load user_agents %}
 
-{% block body %}
+{% block content %}
 <style>
     body {
         overflow-y: hidden; /* Hide vertical scrollbar */
         overflow-x: hidden; /* Hide horizontal scrollbar */
     }
-    @media screen and (max-width: 1000px) {
-        #left-side {
-            display: none;
-        }
-        #right-side {
-            width: 100% !important;
-        }
-    }
 </style>
-<body>
+<body class="overflow-hidden">
     <main>
-        <div style='display:flex; justify-content:center; height: 100vh; align-items: center; overflow-y: hidden; '>
-            <div id="left-side" class="w-50 hidden-sm">
-                <video id="image-login" autoplay loop muted width="100%" height="100%">
+        <div class="flex justify-center items-center h-screen overflow-hidden">
+            <!-- Left side - Video section -->
+            <div id="left-side" class="w-1/2 h-full hidden lg:block relative overflow-hidden bg-gradient-to-br from-blue-600 to-purple-700">
+                <video id="image-login" autoplay loop muted class="absolute inset-0 w-full h-full object-cover opacity-60">
                     {% if not request|is_mobile %}
                         <source src="{% static 'media/highway.mp4' %}" type="video/mp4">
                     {% endif %}
                 </video>
+                <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                <div class="relative z-10 flex items-center justify-center w-full h-full p-12">
+                    <div class="text-white text-center">
+                        <h1 class="text-5xl font-bold mb-4">Bienvenido a Luminet</h1>
+                        <p class="text-xl opacity-90">Sistema de gestión integral</p>
+                    </div>
+                </div>
             </div>
-            <div id="right-side" class="w-50 d-flex align-items-center justify-content-center">
+            <!-- Right side - Form section -->
+            <div id="right-side" class="w-full lg:w-1/2 h-full flex items-center justify-center">
                 {% block right_body %}
                 {% endblock right_body %}
             </div>
         </div>
     </main>
 </body>
-{% endblock %}
+{% endblock content %}
 
-{% block assets %}
-{% endblock assets %}
+{% block extra_css %}
+{% endblock extra_css %}
+
+{% block extra_js %}
+{% endblock extra_js %}
