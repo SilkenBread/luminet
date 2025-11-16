@@ -23,6 +23,7 @@ BASE_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
 ]
 THIRD_PARTY_APPS = [
     "rest_framework",
@@ -38,7 +39,7 @@ THIRD_PARTY_APPS = [
     "leaflet",
     "colorfield",
 ]
-LOCAL_APPS = ["apps.core", "apps.users", "apps.login"]
+LOCAL_APPS = ["apps.core", "apps.users", "apps.login", "apps.infrastructure"]
 
 INSTALLED_APPS = BASE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -79,8 +80,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": env("POSTGRES_DB", default="luminet"),
+        "USER": env("POSTGRES_USER", default="luminet"),
+        "PASSWORD": env("POSTGRES_PASSWORD", default="luminet"),
+        "HOST": env("POSTGRES_HOST", default="db"),
+        "PORT": env("POSTGRES_PORT", default="5432"),
     }
 }
 

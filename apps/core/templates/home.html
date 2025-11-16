@@ -22,7 +22,7 @@
 
     <nav class="flex text-white">
       {% if user.is_authenticated %}
-      <a class="flex gap-2" href="#">Ir al Inicio <i data-lucide="arrow-down-right"></i></a>
+      <a class="flex gap-2" href={% url "core:dashboard" %}>Ir al Inicio <i data-lucide="arrow-down-right"></i></a>
       {% else %}
       <a class="flex gap-2" href={% url "login:login" %}>Iniciar Sesión <i data-lucide="log-in"></i></a>
       {% endif %}
@@ -43,7 +43,7 @@
     </footer> -->
 
     <div class="absolute top-0 bottom-0  h-full w-screen border-none bg-slate-800 ..." >
-    <div class="absolute z-30  w-screen h-full  opacity-10 blur-[2px] ..."></div>
+    <div class="absolute z-30  w-screen h-full  opacity-10 blur-[2px] bg-gradient-to-br from-blue-600 to-purple-700 ..."></div>
       <video
       autoplay
       loop

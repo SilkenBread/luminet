@@ -1,55 +1,59 @@
 {% load static %}
 
 {% block sidebar %}
+<!-- Overlay para cerrar sidebar en móvil -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden transition-opacity duration-300"></div>
+
 <!-- Sidebar con Tailwind CSS -->
-<aside id="sidebar" class="flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out h-screen sticky top-0 flex-shrink-0" style="width: 60px; min-width: 60px;">
+<aside id="sidebar" class="fixed lg:sticky top-0 left-0 h-screen flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out z-50 shadow-xl lg:shadow-none flex-shrink-0 -translate-x-full lg:translate-x-0" style="width: 260px;">
     
     <!-- Sidebar Header -->
-    <div id="sidebarHeader" class="p-3 flex items-center justify-between border-b border-gray-200 flex-shrink-0 transition-colors duration-200">
-        <a href="{% url 'core:home' %}" class="flex items-center textSidebar overflow-hidden" style="display: none;">
-            <span class="text-lg font-bold text-gray-800 whitespace-nowrap">Luminet</span>
+    <div id="sidebarHeader" class="p-4 flex items-center justify-between border-b border-gray-200 flex-shrink-0 bg-gradient-to-r from-blue-600 to-blue-700">
+        <a href="{% url 'core:home' %}" class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+            </div>
+            <span class="text-xl font-bold text-white whitespace-nowrap">Luminet</span>
         </a>
         
-        <button id="iconContent" class="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex-shrink-0">
-            <svg class="w-6 h-6 text-gray-600 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
+        <!-- Botón cerrar solo en móvil -->
+        <button id="closeSidebarBtn" class="p-2 rounded-lg hover:bg-blue-800 transition-colors duration-200 lg:hidden">
+            <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
         </button>
     </div>
 
-    <!-- Divider -->
-    <hr class="border-gray-200 flex-shrink-0 transition-colors duration-200">
-
     <!-- Sidebar Menu -->
-    <ul class="flex-1 overflow-y-auto py-2 space-y-1 px-2">
+    <ul class="flex-1 overflow-y-auto py-4 space-y-1 px-3 sidebar-scroll">
     </ul>
 
     <!-- Sidebar Footer - User Profile -->
-    <div id="sidebarFooter" class="border-t border-gray-200 p-3 flex-shrink-0 transition-colors duration-200">
+    <div id="sidebarFooter" class="border-t border-gray-200 p-4 flex-shrink-0 bg-gray-50">
         <div id="info_profile" class="flex items-center space-x-3">
             <div class="flex-shrink-0">
-                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path opacity="0.4" d="M12.1207 12.78C12.0507 12.77 11.9607 12.77 11.8807 12.78C10.1207 12.72 8.7207 11.28 8.7207 9.50998C8.7207 7.69998 10.1807 6.22998 12.0007 6.22998C13.8107 6.22998 15.2807 7.69998 15.2807 9.50998C15.2707 11.28 13.8807 12.72 12.1207 12.78Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path opacity="0.34" d="M18.7398 19.3801C16.9598 21.0101 14.5998 22.0001 11.9998 22.0001C9.39977 22.0001 7.03977 21.0101 5.25977 19.3801C5.35977 18.4401 5.95977 17.5201 7.02977 16.8001C9.76977 14.9801 14.2498 14.9801 16.9698 16.8001C18.0398 17.5201 18.6398 18.4401 18.7398 19.3801Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-md">
+                    {{ user.get_short_name.0|upper }}
+                </div>
             </div>
             
-            <div class="flex-1 min-w-0 textSidebar overflow-hidden" style="display: none;">
-                <p class="text-sm font-semibold text-gray-900 truncate transition-colors duration-200">
+            <div class="flex-1 min-w-0 overflow-hidden">
+                <p class="text-sm font-semibold text-gray-900 truncate">
                     {{ user.get_short_name }}
                 </p>
                 {% if request.user.groups.first %}
-                <p class="text-xs text-gray-500 truncate transition-colors duration-200">
+                <p class="text-xs text-gray-500 truncate">
                     {{ request.user.groups.first }}
                 </p>
                 {% endif %}
             </div>
             
-            <div class="textSidebar flex-shrink-0" style="display: none;">
+            <div class="flex-shrink-0">
                 <a href="{% url 'login:logout' %}" class="p-2 rounded-lg hover:bg-red-50 transition-colors duration-200 group inline-block" title="Cerrar sesión">
                     <svg class="w-5 h-5 text-gray-500 group-hover:text-red-600 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -64,10 +68,7 @@
 
 <!-- Scripts del Sidebar -->
 <script>
-// Toggle Sidebar
 $(document).ready(function () {
-    let sidebarOpen = false;
-    
     // Resaltar enlace activo según la ruta actual
     const currentPath = "{{ list_url }}";
     $(".nav-customitem").each(function () {
@@ -75,19 +76,45 @@ $(document).ready(function () {
         $(this).toggleClass("active", isActive);
     });
     
-    // Mostrar/Ocultar el sidebar
-    $('#iconContent').click(function() {
-        sidebarOpen = !sidebarOpen;
-        $('#sidebar').css('width', sidebarOpen ? '220px' : '60px');
-        $('.textSidebar').css('display', sidebarOpen ? 'block' : 'none');
+    // Funcionalidad para abrir/cerrar sidebar en móvil
+    function openSidebar() {
+        $('#sidebar').removeClass('-translate-x-full');
+        $('#sidebarOverlay').removeClass('hidden');
+        $('body').addClass('overflow-hidden lg:overflow-auto');
+    }
+    
+    function closeSidebar() {
+        $('#sidebar').addClass('-translate-x-full');
+        $('#sidebarOverlay').addClass('hidden');
+        $('body').removeClass('overflow-hidden');
+    }
+    
+    // Botón del header para abrir sidebar (solo móvil)
+    $('#openSidebarBtn').click(function() {
+        openSidebar();
+    });
+    
+    // Botón para cerrar sidebar
+    $('#closeSidebarBtn').click(function() {
+        closeSidebar();
+    });
+    
+    // Cerrar al hacer click en el overlay
+    $('#sidebarOverlay').click(function() {
+        closeSidebar();
+    });
+    
+    // Cerrar sidebar al hacer click en un enlace (solo en móvil)
+    $('.nav-customitem').click(function() {
+        if (window.innerWidth < 1024) {
+            closeSidebar();
+        }
     });
 });
 
-// Rotar flechas en submenús (sin Bootstrap)
+// Rotar flechas en submenús
 document.addEventListener('DOMContentLoaded', function () {
-    // Buscar todos los elementos con clase submenu
     document.querySelectorAll('.submenu').forEach(function(submenu) {
-        // Encontrar el botón que controla este submenú
         const trigger = document.querySelector(`[data-submenu-target='${submenu.id}']`);
         
         if (trigger) {
@@ -99,13 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const isHidden = submenu.classList.contains('hidden');
                 
                 if (isHidden) {
-                    // Mostrar submenú
                     submenu.classList.remove('hidden');
                     if (arrow) {
                         arrow.style.transform = 'rotate(90deg)';
                     }
                 } else {
-                    // Ocultar submenú
                     submenu.classList.add('hidden');
                     if (arrow) {
                         arrow.style.transform = 'rotate(0deg)';

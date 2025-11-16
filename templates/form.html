@@ -1,171 +1,88 @@
-{% extends 'body.html' %}{% extends 'body.html' %}
+{% extends 'body.html' %}
 
-{% load widget_tweaks %}{% load widget_tweaks %}
+{% load widget_tweaks %}
 
-
-
-{% block content_main %}{% block content_main %}
-
-<div class="max-w-7xl mx-auto">    <form method="post"  id='formulario' action="." enctype="multipart/form-data">
-
-    <!-- Form Card -->        <div class="card card-dark">
-
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">            <div class="card-header" style='text-align:center;'>
-
-        <!-- Card Header -->                <h4 class="card-title text-align-center">
-
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">                    {% if action == 'add' %}
-
-            <h4 class="text-xl font-semibold text-white flex items-center">                        <i class="fas fa-plus"></i>
-
-                {% if action == 'add' %}                    {% else %}
-
-                    <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">                    <i class="fa-regular fa-pen-to-square"></i>
-
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />                    {% endif %}
-
+{% block content_main %}
+<div class="max-w-7xl mx-auto">
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <!-- Card Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+            <h4 class="text-xl font-semibold text-white flex items-center">
+                {% if action == 'add' %}
+                    <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-
-                {% else %}                    <strong>{{ title }}</strong>
-
-                    <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">                </h4>
-
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />            </div>
-
-                    </svg>            <div class="card-body">
-
-                {% endif %}                {% csrf_token %}
-
-                {{ title }}                <input type="hidden" name="action" value="{{ action }}">
-
-            </h4>                {% if form.errors %}
-
-        </div>                    <div class="alert alert-success alert-dismissible">
-
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-
-        <!-- Form Body -->                        <h5><i class="icon fas fa-ban"></i> Ha ocurrido un error al querer guardar el registro</h5>
-
-        <form method="post" id="formulario" action="." enctype="multipart/form-data">                        <ul>
-
-            <div class="p-6">                            {% for field in form %}
-
-                {% csrf_token %}                                {% for error in field.errors %}
-
-                <input type="hidden" name="action" value="{{ action }}">                                    <li>{{ error }}</li>
-
-                                                {% endfor %}
-
-                <!-- Error Messages -->                            {% endfor %}
-
-                {% if form.errors %}                        </ul>
-
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">                    </div>
-
-                    <div class="flex items-start">                {% endif %}
-
-                        <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">                <div class="row">
-
-                            <circle cx="12" cy="12" r="10"></circle>                {% for field in form.visible_fields %}
-
-                            <line x1="12" y1="8" x2="12" y2="12"></line>                    <div class="form-group col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
-
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>                        <label for="">{{ field.label }}:</label>
-
-                        </svg>                        {{ field|add_class:'form-control'|attr:'autocomplete:off' }}
-
-                        <div>                        <br>
-
-                            <h5 class="text-red-800 font-semibold mb-2">Ha ocurrido un error al guardar el registro</h5>                    </div>
-
-                            <ul class="list-disc list-inside text-sm text-red-700 space-y-1">                {% endfor %}
-
-                                {% for field in form %}                </div>
-
-                                    {% for error in field.errors %}            </div>
-
-                                        <li>{{ error }}</li>            <div class="card-footer">
-
-                                    {% endfor %}                <button type="submit" class="btn btn-outline-primary m-1">
-
-                                {% endfor %}                    <i data-lucide="save"></i> Guardar registro
-
-                            </ul>                </button>
-
-                        </div>                <a href="{{ list_url }}" class="btn btn-outline-success m-1">
-
-                    </div>                    <i data-lucide="x"></i> Cancelar
-
-                </div>                </a>
-
-                {% endif %}            </div>
-
+                {% else %}
+                    <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                {% endif %}
+                {{ title }}
+            </h4>
         </div>
 
-                <!-- Form Fields Grid -->    </form>
+        <!-- Form Body -->
+        <form method="post" id="formulario" action="." enctype="multipart/form-data">
+            <div class="p-6">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{{ action }}">
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">    {% block script %}
-
-                    {% for field in form.visible_fields %}        <script>
-
-                    <div class="form-group">            {% if form.errors %}
-
-                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">                var errors = '';
-
-                            {{ field.label }}:                {% for field in form %}
-
-                            {% if field.field.required %}                    {% for error in field.errors %}
-
-                                <span class="text-red-500">*</span>                        errors += '{{ error }}\n';
-
-                            {% endif %}                    {% endfor %}
-
-                        </label>                {% endfor %}
-
-                        {{ field|add_class:'block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm'|attr:'autocomplete:off' }}                {% for error in form.non_field_errors %}
-
-                        {% if field.help_text %}                    errors += '{{ error }}\n';
-
-                            <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>                {% endfor %}
-
-                        {% endif %}                Swal.fire({
-
-                        {% if field.errors %}                    title: 'Error!',
-
-                            <p class="mt-1 text-xs text-red-600">{{ field.errors.0 }}</p>                    text: errors,
-
-                        {% endif %}                    icon: 'error'
-
-                    </div>                });
-
-                    {% endfor %}            {% endif %}
-
+                <!-- Error Messages -->
+                {% if form.errors %}
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <div>
+                            <h5 class="text-red-800 font-semibold mb-2">Ha ocurrido un error al guardar el registro</h5>
+                            <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
                 </div>
+                {% endif %}
 
-            </div>            $('form').on('submit', function (e) {
+                <!-- Form Fields Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {% for field in form.visible_fields %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ field.label }}:
+                            {% if field.field.required %}
+                                <span class="text-red-500">*</span>
+                            {% endif %}
+                        </label>
+                        {{ field|add_class:'block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm'|attr:'autocomplete:off' }}
+                        {% if field.help_text %}
+                            <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% if field.errors %}
+                            <p class="mt-1 text-xs text-red-600">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-                e.preventDefault();
-
-            <!-- Card Footer with Actions -->                //se usa cuando no se envia por AJAX
-
-            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-wrap gap-3">                //var parameters = $(this).serializeArray();
-
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">                var parameters = new FormData(this);
-
-                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">                submit_with_ajax(window.location.pathname, 'Notificación', '¿Estas seguro de realizar la siguiente acción?', parameters, function () {
-
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>                    location.href = '{{ list_url }}';
-
-                        <polyline points="17 21 17 13 7 13 7 21"></polyline>                });
-
-                        <polyline points="7 3 7 8 15 8"></polyline>            });
-
-                    </svg>        </script>
-
-                    Guardar registro    {% endblock %}
-
-                </button>{% endblock content_main %}
-
+            <!-- Card Footer with Actions -->
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-wrap gap-3">
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Guardar registro
+                </button>
                 <a href="{{ list_url }}" class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                     <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -198,13 +115,75 @@
         });
     {% endif %}
 
-    $('form').on('submit', function (e) {
+    document.getElementById('formulario').addEventListener('submit', async function (e) {
         e.preventDefault();
-        var parameters = new FormData(this);
-        submit_with_ajax(window.location.pathname, 'Notificación', '¿Estás seguro de realizar la siguiente acción?', parameters, function () {
-            location.href = '{{ list_url }}';
+        
+        // Mostrar confirmación
+        const result = await Swal.fire({
+            title: 'Notificación',
+            text: '¿Estás seguro de realizar la siguiente acción?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#3b82f6',
+            cancelButtonColor: '#6b7280'
         });
+        
+        if (!result.isConfirmed) {
+            return;
+        }
+        
+        // Obtener datos del formulario
+        const formData = new FormData(this);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        try {
+            // Hacer la petición
+            const response = await fetch(window.location.pathname, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            // Verificar si hubo errores
+            if (data.error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: typeof data.error === 'string' ? data.error : 'Hubo un error al procesar la solicitud',
+                    icon: 'error',
+                    confirmButtonColor: '#3b82f6'
+                });
+                return;
+            }
+            
+            // Mostrar éxito y redirigir
+            await Swal.fire({
+                title: 'Éxito',
+                text: 'El registro se ha guardado correctamente',
+                icon: 'success',
+                confirmButtonColor: '#3b82f6',
+                timer: 1500,
+                showConfirmButton: false
+            });
+            
+            window.location.href = '{{ list_url }}';
+            
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al procesar la solicitud',
+                icon: 'error',
+                confirmButtonColor: '#3b82f6'
+            });
+            console.error('Error:', error);
+        }
     });
 </script>
 {% endblock %}
 {% endblock content_main %}
+

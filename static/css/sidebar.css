@@ -1,76 +1,152 @@
-/* Estilos adicionales para el Sidebar con Tailwind */
+/* Estilos mejorados para el Sidebar responsive */
 
-/* Asegurar que el sidebar se vea correctamente */
+/* Sidebar principal - comportamiento base */
 #sidebar {
-    transition: width 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     overflow-x: hidden;
 }
 
-/* Ocultar el texto del sidebar cuando está colapsado */
-#sidebar:not([style*="width: 220px"]) .textSidebar {
-    opacity: 0;
-    pointer-events: none;
+/* En escritorio, el sidebar siempre está visible */
+@media (min-width: 1024px) {
+    #sidebar {
+        position: sticky !important;
+        transform: translateX(0) !important;
+    }
 }
 
-/* Mostrar el texto del sidebar cuando está expandido */
-#sidebar[style*="width: 220px"] .textSidebar {
-    opacity: 1;
-    pointer-events: auto;
-    transition: opacity 0.2s ease-in-out 0.1s;
+/* En móvil, el sidebar se oculta por defecto */
+@media (max-width: 1023px) {
+    #sidebar {
+        position: fixed;
+    }
 }
 
-/* Mejorar la visualización del avatar */
-#info_profile img {
-    flex-shrink: 0;
+/* Scrollbar personalizado para el menú */
+.sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
 }
 
-/* Hover effects para los items del menú */
+.sidebar-scroll::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Estilos para los items del menú */
 .nav-customitem {
     transition: all 0.2s ease-in-out;
     position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    color: #4b5563;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
+.nav-customitem:hover {
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
+
+/* Estado activo del item */
 .nav-customitem.active {
-    background-color: rgba(59, 130, 246, 0.15);
+    background-color: #eff6ff;
+    color: #2563eb;
     border-left: 3px solid #2563eb;
+    padding-left: calc(1rem - 3px);
 }
 
-/* Mejorar la transición del sidebar */
-.textSidebar {
-    transition: opacity 0.2s ease-in-out;
-    white-space: nowrap;
-}
-
-/* Asegurar que el contenido no se desborde */
-#sidebar * {
-    box-sizing: border-box;
+/* Iconos de los items del menú */
+.nav-customitem svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
 }
 
 /* Estilos para submenús */
 .submenu {
     overflow: hidden;
-    transition: max-height 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    padding-left: 1rem;
 }
 
-/* Estilos para las flechas de submenús */
+.submenu .nav-customitem {
+    padding-left: 2rem;
+    font-size: 0.8125rem;
+}
+
+/* Flechas de submenús */
 .arrow-icon {
     transition: transform 0.3s ease-in-out;
+    margin-left: auto;
 }
 
-/* Scrollbar personalizado */
-#sidebar::-webkit-scrollbar {
-    width: 6px;
+/* Overlay para móvil */
+#sidebarOverlay {
+    transition: opacity 0.3s ease-in-out;
 }
 
-#sidebar::-webkit-scrollbar-track {
-    background: #f3f4f6;
+/* Animación de entrada/salida del sidebar en móvil */
+@media (max-width: 1023px) {
+    #sidebar {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    #sidebar:not(.-translate-x-full) {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
 }
 
-#sidebar::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 3px;
+/* Badge o contador */
+.nav-badge {
+    margin-left: auto;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
 }
 
-#sidebar::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+/* Mejorar la visualización del footer */
+#sidebarFooter {
+    background: linear-gradient(to bottom, transparent, rgba(249, 250, 251, 0.5));
+}
+
+/* Asegurar que el contenido principal no se superponga */
+@media (min-width: 1024px) {
+    body {
+        display: flex;
+    }
+}
+
+/* Animaciones suaves */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Mejorar accesibilidad */
+.nav-customitem:focus,
+button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Prevenir selección de texto en elementos interactivos */
+.nav-customitem,
+button {
+    user-select: none;
+    -webkit-user-select: none;
 }
