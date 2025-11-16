@@ -12,12 +12,7 @@ from crum import get_current_request, get_current_user
 # django-simple-history
 from simple_history.models import HistoricalRecords
 
-# django-image-kit
-from imagekit.models import ProcessedImageField
-from imagekit.processors import ResizeToFill
-
 # local Django
-from config.settings import MEDIA_URL, STATIC_URL
 from apps.models import BaseModel
 # from ..infrastructure.models import Comuna
 
@@ -115,8 +110,12 @@ class Crew(BaseModel):
         return item
 
 
+# Función de compatibilidad para migraciones antiguas
 def user_avatar_upload_path(instance, filename):
-    # Generar un nombre único para el archivo basado en el ID y DNI del usuario
+    """
+    DEPRECATED: Esta función se mantiene solo para compatibilidad con migraciones antiguas.
+    El campo avatar ha sido removido del modelo User.
+    """
     extension = filename.split(".")[-1]
     return f"users/{instance.id}-{instance.dni}.{extension}"
 
@@ -154,12 +153,6 @@ class User(AbstractUser, BaseModel):
     fk_crew = models.ForeignKey(
         Crew, on_delete=models.PROTECT, blank=True, null=True, verbose_name="Cuadrilla"
     )
-    avatar = ProcessedImageField(
-        upload_to=user_avatar_upload_path,
-        processors=[ResizeToFill(400, 400)],
-        format="JPEG",
-        blank=True,
-    )
     historical = HistoricalRecords()
 
     USERNAME_FIELD = "username"
@@ -193,10 +186,28 @@ class User(AbstractUser, BaseModel):
         self.email = self.email.lower()
         super(User, self).save()
 
-    def get_avatar(self):
-        if self.avatar:
-            return "{}{}".format(MEDIA_URL, self.avatar)
-        return "{}{}".format(STATIC_URL, "img/user.webp")
+    def get_gradient_colors(self):
+        """
+        Genera un gradiente único basado en el ID del usuario.
+        Retorna un diccionario con los colores del gradiente.
+        """
+        # Lista de combinaciones de gradientes atractivos
+        gradients = [
+            {"from": "blue-500", "to": "purple-600", "from_hex": "#3b82f6", "to_hex": "#9333ea"},
+            {"from": "pink-500", "to": "rose-600", "from_hex": "#ec4899", "to_hex": "#e11d48"},
+            {"from": "green-500", "to": "teal-600", "from_hex": "#22c55e", "to_hex": "#0d9488"},
+            {"from": "orange-500", "to": "red-600", "from_hex": "#f97316", "to_hex": "#dc2626"},
+            {"from": "indigo-500", "to": "blue-600", "from_hex": "#6366f1", "to_hex": "#2563eb"},
+            {"from": "cyan-500", "to": "blue-600", "from_hex": "#06b6d4", "to_hex": "#2563eb"},
+            {"from": "violet-500", "to": "purple-600", "from_hex": "#8b5cf6", "to_hex": "#9333ea"},
+            {"from": "fuchsia-500", "to": "pink-600", "from_hex": "#d946ef", "to_hex": "#db2777"},
+            {"from": "emerald-500", "to": "green-600", "from_hex": "#10b981", "to_hex": "#16a34a"},
+            {"from": "amber-500", "to": "orange-600", "from_hex": "#f59e0b", "to_hex": "#ea580c"},
+        ]
+        
+        # Usar el ID del usuario para seleccionar un gradiente de forma consistente
+        index = self.id % len(gradients)
+        return gradients[index]
 
     def get_group_session(self):
         try:
@@ -215,7 +226,7 @@ class User(AbstractUser, BaseModel):
         if self.last_login:
             item["last_login"] = self.last_login.strftime("%Y-%m-%d")
         item["date_joined"] = self.date_joined.strftime("%Y-%m-%d")
-        item["avatar"] = self.get_avatar()
+        item["gradient"] = self.get_gradient_colors()
         item["full_name"] = self.get_full_name()
         item["groups"] = [{"id": g.id, "name": g.name} for g in self.groups.all()]
         return item

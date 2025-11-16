@@ -31,20 +31,37 @@
 
     <!-- Sidebar Menu -->
     <ul class="flex-1 overflow-y-auto py-4 space-y-1 px-3 sidebar-scroll">
+        <!-- Dashboard -->
+        <li>
+            <a href="{% url 'core:dashboard' %}" class="nav-customitem flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-600 transition-colors duration-200"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+        </li>
+
+        <!-- Usuarios -->
+        <li>
+            <a href="{% url 'users:user_list' %}" class="nav-customitem flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group">
+                <i data-lucide="users" class="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-600 transition-colors duration-200"></i>
+                <span class="font-medium">Usuarios</span>
+            </a>
+        </li>
     </ul>
 
     <!-- Sidebar Footer - User Profile -->
     <div id="sidebarFooter" class="border-t border-gray-200 p-4 flex-shrink-0 bg-gray-50">
         <div id="info_profile" class="flex items-center space-x-3">
             <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-md">
-                    {{ user.get_short_name.0|upper }}
+                {% with gradient=user.get_gradient_colors %}
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-{{ gradient.from }} to-{{ gradient.to }} flex items-center justify-center text-white font-semibold shadow-md">
+                    {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
                 </div>
+                {% endwith %}
             </div>
             
             <div class="flex-1 min-w-0 overflow-hidden">
                 <p class="text-sm font-semibold text-gray-900 truncate">
-                    {{ user.get_short_name }}
+                    {{ user.get_full_name }}
                 </p>
                 {% if request.user.groups.first %}
                 <p class="text-xs text-gray-500 truncate">
