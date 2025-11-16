@@ -1,0 +1,353 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block content_main %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header con gradiente del usuario -->
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <!-- Gradiente del usuario -->
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-{{ user_gradient.from }} to-{{ user_gradient.to }} flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                {{ object.first_name.0|upper }}{{ object.last_name.0|upper }}
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ form_title }}</h1>
+                <p class="mt-1 text-sm text-gray-500">Modifique los datos del usuario</p>
+            </div>
+        </div>
+        <a href="{{ list_url }}" 
+           class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
+            <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+            Volver
+        </a>
+    </div>
+
+    <!-- Formulario -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <form id="userForm" method="post" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            <!-- Información Personal -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    <i data-lucide="user" class="w-5 h-5 inline-block mr-2"></i>
+                    Información Personal
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nombre -->
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.first_name.label }} <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.first_name }}
+                        <p class="mt-1 text-xs text-red-600 hidden" id="error_first_name"></p>
+                    </div>
+
+                    <!-- Apellido -->
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.last_name.label }} <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.last_name }}
+                        <p class="mt-1 text-xs text-red-600 hidden" id="error_last_name"></p>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.email.label }} <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.email }}
+                        <p class="mt-1 text-xs text-red-600 hidden" id="error_email"></p>
+                    </div>
+
+                    <!-- DNI -->
+                    <div>
+                        <label for="{{ form.dni.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.dni.label }} <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.dni }}
+                        <p class="mt-1 text-xs text-gray-500 text-xs">Entre 7 y 10 dígitos</p>
+                        <p class="mt-1 text-xs text-red-600 hidden" id="error_dni"></p>
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div>
+                        <label for="{{ form.phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.phone_number.label }} <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.phone_number }}
+                        <p class="mt-1 text-xs text-gray-500">Debe iniciar con 3 o 6 (10 dígitos)</p>
+                        <p class="mt-1 text-xs text-red-600 hidden" id="error_phone_number"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credenciales -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    <i data-lucide="key" class="w-5 h-5 inline-block mr-2"></i>
+                    Credenciales de Acceso
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Username (Solo lectura) -->
+                    <div class="md:col-span-2">
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.username.label }}
+                        </label>
+                        {{ form.username }}
+                        <p class="mt-1 text-xs text-gray-500">{{ form.username.help_text }}</p>
+                    </div>
+
+                    <!-- Checkbox para cambiar contraseña -->
+                    <div class="md:col-span-2">
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            {{ form.change_password }}
+                            <label for="{{ form.change_password.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700">
+                                {{ form.change_password.label }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Campos de contraseña (ocultos por defecto) -->
+                    <div id="password_fields" class="md:col-span-2 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <!-- Nueva Password -->
+                            <div>
+                                <label for="{{ form.new_password1.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ form.new_password1.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.new_password1 }}
+                                <p class="mt-1 text-xs text-gray-500">Mínimo 8 caracteres</p>
+                                <p class="mt-1 text-xs text-red-600 hidden" id="error_new_password1"></p>
+                            </div>
+
+                            <!-- Confirmar Password -->
+                            <div>
+                                <label for="{{ form.new_password2.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ form.new_password2.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.new_password2 }}
+                                <p class="mt-1 text-xs text-red-600 hidden" id="error_new_password2"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organización -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    <i data-lucide="building-2" class="w-5 h-5 inline-block mr-2"></i>
+                    Organización
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Área -->
+                    <div>
+                        <label for="{{ form.fk_area.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.fk_area.label }} <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.fk_area }}
+                        <p class="mt-1 text-xs text-red-600 hidden" id="error_fk_area"></p>
+                    </div>
+
+                    <!-- Cuadrilla -->
+                    <div>
+                        <label for="{{ form.fk_crew.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            {{ form.fk_crew.label }}
+                        </label>
+                        {{ form.fk_crew }}
+                        <p class="mt-1 text-xs text-red-600 hidden" id="error_fk_crew"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permisos -->
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    <i data-lucide="shield-check" class="w-5 h-5 inline-block mr-2"></i>
+                    Permisos y Estado
+                </h2>
+                <div class="space-y-3">
+                    <!-- Usuario Activo -->
+                    <div class="flex items-center">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700">
+                            {{ form.is_active.label }}
+                        </label>
+                    </div>
+
+                    <!-- Es Staff -->
+                    <div class="flex items-center">
+                        {{ form.is_staff }}
+                        <label for="{{ form.is_staff.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700">
+                            {{ form.is_staff.label }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+                <a href="{{ list_url }}" 
+                   class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm inline-flex items-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    {{ submit_text }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content_main %}
+
+{% block extra_body_content %}
+<script>
+$(document).ready(function() {
+    // Mostrar/ocultar campos de contraseña
+    $('#id_change_password').change(function() {
+        if ($(this).is(':checked')) {
+            $('#password_fields').removeClass('hidden');
+        } else {
+            $('#password_fields').addClass('hidden');
+            $('#{{ form.new_password1.id_for_label }}').val('');
+            $('#{{ form.new_password2.id_for_label }}').val('');
+        }
+    });
+
+    // Filtrar cuadrillas por área
+    const initialAreaId = $('#{{ form.fk_area.id_for_label }}').val();
+    const initialCrewId = '{{ object.fk_crew.id|default:"" }}';
+    
+    $('#{{ form.fk_area.id_for_label }}').change(function() {
+        const areaId = $(this).val();
+        const crewSelect = $('#{{ form.fk_crew.id_for_label }}');
+        
+        crewSelect.prop('disabled', true);
+        crewSelect.html('<option value="">Cargando...</option>');
+        
+        if (areaId) {
+            $.ajax({
+                url: window.location.pathname,
+                type: 'GET',
+                data: { area_id: areaId },
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(data) {
+                    crewSelect.html('<option value="">Seleccione una cuadrilla</option>');
+                    data.forEach(function(crew) {
+                        const selected = crew.id == initialCrewId ? 'selected' : '';
+                        crewSelect.append(`<option value="${crew.id}" ${selected}>${crew.name}</option>`);
+                    });
+                    crewSelect.prop('disabled', false);
+                },
+                error: function() {
+                    crewSelect.html('<option value="">Error al cargar cuadrillas</option>');
+                    crewSelect.prop('disabled', true);
+                }
+            });
+        } else {
+            crewSelect.html('<option value="">Seleccione un área primero</option>');
+            crewSelect.prop('disabled', true);
+        }
+    });
+
+    // Cargar cuadrillas iniciales si hay área seleccionada
+    if (initialAreaId) {
+        $('#{{ form.fk_area.id_for_label }}').trigger('change');
+    }
+
+    // Enviar formulario con AJAX
+    $('#userForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Limpiar errores previos
+        $('.text-red-600').addClass('hidden');
+        $('input, select').removeClass('border-red-500');
+        
+        const formData = new FormData(this);
+        
+        Swal.fire({
+            title: 'Actualizando usuario...',
+            text: 'Por favor espere',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: response.message,
+                        icon: 'success',
+                        confirmButtonColor: '#3b82f6',
+                        confirmButtonText: 'Aceptar'
+                    }).then(() => {
+                        window.location.href = response.redirect_url;
+                    });
+                } else {
+                    Swal.close();
+                    
+                    if (response.errors) {
+                        // Mostrar errores de validación
+                        Object.keys(response.errors).forEach(function(field) {
+                            const errorDiv = $('#error_' + field);
+                            const inputField = $('#id_' + field);
+                            
+                            errorDiv.text(response.errors[field].join(', '));
+                            errorDiv.removeClass('hidden');
+                            inputField.addClass('border-red-500');
+                        });
+                        
+                        Swal.fire({
+                            title: 'Error de Validación',
+                            text: 'Por favor corrija los errores en el formulario',
+                            icon: 'error',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.message || 'Ocurrió un error al actualizar el usuario',
+                            icon: 'error',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                    }
+                }
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error al comunicarse con el servidor',
+                    icon: 'error',
+                    confirmButtonColor: '#3b82f6'
+                });
+            }
+        });
+    });
+    
+    // Limpiar error al escribir
+    $('input, select').on('input change', function() {
+        const fieldId = $(this).attr('id').replace('id_', '');
+        $('#error_' + fieldId).addClass('hidden');
+        $(this).removeClass('border-red-500');
+    });
+});
+</script>
+{% endblock extra_body_content %}

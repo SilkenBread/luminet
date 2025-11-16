@@ -194,8 +194,7 @@ $(document).ready(function() {
 
 // Función para editar usuario
 function editUser(userId) {
-    // TODO: Implementar redirección a página de edición
-    window.location.href = `/users/edit/${userId}/`;
+    window.location.href = `{% url 'users:user_edit' 0 %}`.replace('0', userId);
 }
 
 // Función para eliminar usuario
@@ -212,27 +211,40 @@ function deleteUser(userId, username) {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // TODO: Implementar llamada AJAX para eliminar
+            const deleteUrl = '{% url "users:user_delete" 0 %}'.replace('0', userId);
             $.ajax({
-                url: `/users/delete/${userId}/`,
+                url: deleteUrl,
                 type: 'POST',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')
                 },
                 success: function(response) {
-                    Swal.fire({
-                        title: '¡Eliminado!',
-                        text: 'El usuario ha sido eliminado correctamente',
-                        icon: 'success',
-                        confirmButtonColor: '#3b82f6',
-                        timer: 2000
-                    });
-                    $('#usersTable').DataTable().ajax.reload();
+                    if (response.success) {
+                        Swal.fire({
+                            title: '¡Eliminado!',
+                            text: response.message || 'El usuario ha sido eliminado correctamente',
+                            icon: 'success',
+                            confirmButtonColor: '#3b82f6',
+                            timer: 2000
+                        });
+                        $('#usersTable').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.message || 'No se pudo eliminar el usuario',
+                            icon: 'error',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                    }
                 },
                 error: function(xhr) {
+                    let errorMessage = 'No se pudo eliminar el usuario';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
                     Swal.fire({
                         title: 'Error',
-                        text: 'No se pudo eliminar el usuario',
+                        text: errorMessage,
                         icon: 'error',
                         confirmButtonColor: '#3b82f6'
                     });
