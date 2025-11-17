@@ -46,6 +46,33 @@
                 <span class="font-medium">Usuarios</span>
             </a>
         </li>
+
+        <!-- Infraestructura (Desplegable) -->
+        <li>
+            <button type="button" data-submenu-target="infraSubmenu" class="nav-customitem w-full flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group">
+                <i data-lucide="lightbulb" class="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-600 transition-colors duration-200"></i>
+                <span class="font-medium">Infraestructura</span>
+                <svg class="arrow-icon w-4 h-4 ml-auto text-gray-500 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            <!-- Submenú -->
+            <ul id="infraSubmenu" class="submenu hidden mt-1 space-y-1">
+                <li>
+                    <a href="#" data-url="/infraestructura/luminarias/" class="nav-customitem flex items-center px-4 py-2 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
+                        <i data-lucide="zap" class="w-4 h-4 mr-3 text-gray-400"></i>
+                        <span class="text-sm">Luminarias</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-url="/infraestructura/apoyos/" class="nav-customitem flex items-center px-4 py-2 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
+                        <i data-lucide="columns" class="w-4 h-4 mr-3 text-gray-400"></i>
+                        <span class="text-sm">Apoyos</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Areas -->
         <li>
             <a href="#" class="nav-customitem flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group">
@@ -94,10 +121,31 @@
 <script>
 $(document).ready(function () {
     // Resaltar enlace activo según la ruta actual
-    const currentPath = "{{ list_url }}";
+    const currentPath = window.location.pathname;
+    
     $(".nav-customitem").each(function () {
-        const isActive = $(this).attr("href") === currentPath;
-        $(this).toggleClass("active", isActive);
+        const itemHref = $(this).attr("href");
+        const itemDataUrl = $(this).attr("data-url");
+        const urlToCheck = itemDataUrl || itemHref;
+        
+        if (urlToCheck && urlToCheck !== '#') {
+            const isActive = currentPath === urlToCheck || currentPath.startsWith(urlToCheck);
+            $(this).toggleClass("active", isActive);
+            
+            // Si el item está dentro de un submenú y está activo, abrir el submenú
+            if (isActive) {
+                const parentSubmenu = $(this).closest('.submenu');
+                if (parentSubmenu.length) {
+                    parentSubmenu.removeClass('hidden');
+                    const submenuId = parentSubmenu.attr('id');
+                    const trigger = $(`[data-submenu-target="${submenuId}"]`);
+                    const arrow = trigger.find('.arrow-icon');
+                    if (arrow.length) {
+                        arrow.css('transform', 'rotate(90deg)');
+                    }
+                }
+            }
+        }
     });
     
     // Funcionalidad para abrir/cerrar sidebar en móvil
@@ -129,38 +177,27 @@ $(document).ready(function () {
     });
     
     // Cerrar sidebar al hacer click en un enlace (solo en móvil)
-    $('.nav-customitem').click(function() {
+    $('.nav-customitem[href]').click(function() {
         if (window.innerWidth < 1024) {
             closeSidebar();
         }
     });
-});
-
-// Rotar flechas en submenús
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.submenu').forEach(function(submenu) {
-        const trigger = document.querySelector(`[data-submenu-target='${submenu.id}']`);
+    
+    // Toggle de submenús
+    $('[data-submenu-target]').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         
-        if (trigger) {
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const arrow = trigger.querySelector('.arrow-icon');
-                const isHidden = submenu.classList.contains('hidden');
-                
-                if (isHidden) {
-                    submenu.classList.remove('hidden');
-                    if (arrow) {
-                        arrow.style.transform = 'rotate(90deg)';
-                    }
-                } else {
-                    submenu.classList.add('hidden');
-                    if (arrow) {
-                        arrow.style.transform = 'rotate(0deg)';
-                    }
-                }
-            });
+        const targetId = $(this).attr('data-submenu-target');
+        const submenu = $(`#${targetId}`);
+        const arrow = $(this).find('.arrow-icon');
+        
+        if (submenu.hasClass('hidden')) {
+            submenu.removeClass('hidden');
+            arrow.css('transform', 'rotate(90deg)');
+        } else {
+            submenu.addClass('hidden');
+            arrow.css('transform', 'rotate(0deg)');
         }
     });
 });

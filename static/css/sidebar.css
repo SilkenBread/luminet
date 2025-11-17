@@ -1,152 +1,166 @@
-/* Estilos mejorados para el Sidebar responsive */
-
+* {
+  -webkit-tap-highlight-color: transparent;
+}
 /* Sidebar principal - comportamiento base */
 #sidebar {
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-    overflow-x: hidden;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  overflow-x: hidden;
 }
 
 /* En escritorio, el sidebar siempre está visible */
 @media (min-width: 1024px) {
-    #sidebar {
-        position: sticky !important;
-        transform: translateX(0) !important;
-    }
+  #sidebar {
+    position: sticky !important;
+    transform: translateX(0) !important;
+  }
 }
 
 /* En móvil, el sidebar se oculta por defecto */
 @media (max-width: 1023px) {
-    #sidebar {
-        position: fixed;
-    }
+  #sidebar {
+    position: fixed;
+  }
 }
 
 /* Scrollbar personalizado para el menú */
 .sidebar-scroll::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    border-radius: 3px;
+  background: #f3f4f6;
+  border-radius: 3px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 3px;
+  background: #d1d5db;
+  border-radius: 3px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+  background: #9ca3af;
 }
 
 /* Estilos para los items del menú */
 .nav-customitem {
-    transition: all 0.2s ease-in-out;
-    position: relative;
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    color: #4b5563;
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .nav-customitem:hover {
-    background-color: #f3f4f6;
-    color: #1f2937;
+  background-color: #f3f4f6;
+  color: #1f2937;
 }
 
 /* Estado activo del item */
 .nav-customitem.active {
-    background-color: #eff6ff;
-    color: #2563eb;
-    border-left: 3px solid #2563eb;
-    padding-left: calc(1rem - 3px);
+  background-color: #eff6ff;
+  color: #2563eb;
+  border-left: 3px solid #2563eb;
+  padding-left: calc(1rem - 3px);
 }
 
 /* Iconos de los items del menú */
 .nav-customitem svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-right: 0.75rem;
-    flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
 }
 
 /* Estilos para submenús */
 .submenu {
-    overflow: hidden;
-    transition: all 0.3s ease-in-out;
-    padding-left: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  padding-left: 0.5rem;
+  margin-left: 0.5rem;
+  border-left: 2px solid #e5e7eb;
 }
 
 .submenu .nav-customitem {
-    padding-left: 2rem;
-    font-size: 0.8125rem;
+  padding-left: 2.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.submenu .nav-customitem.active {
+  border-left: none;
+  padding-left: 2.5rem;
 }
 
 /* Flechas de submenús */
 .arrow-icon {
-    transition: transform 0.3s ease-in-out;
-    margin-left: auto;
+  transition: transform 0.3s ease-in-out;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Botones de desplegable */
+button.nav-customitem {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
 }
 
 /* Overlay para móvil */
 #sidebarOverlay {
-    transition: opacity 0.3s ease-in-out;
-}
-
-/* Animación de entrada/salida del sidebar en móvil */
-@media (max-width: 1023px) {
-    #sidebar {
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    #sidebar:not(.-translate-x-full) {
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    }
+  transition: opacity 0.3s ease-in-out;
 }
 
 /* Badge o contador */
 .nav-badge {
-    margin-left: auto;
-    padding: 0.125rem 0.5rem;
-    border-radius: 9999px;
-    background-color: #ef4444;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
+  margin-left: auto;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 /* Mejorar la visualización del footer */
 #sidebarFooter {
-    background: linear-gradient(to bottom, transparent, rgba(249, 250, 251, 0.5));
-}
-
-/* Asegurar que el contenido principal no se superponga */
-@media (min-width: 1024px) {
-    body {
-        display: flex;
-    }
-}
-
-/* Animaciones suaves */
-* {
-    -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(to bottom, transparent, rgba(249, 250, 251, 0.5));
 }
 
 /* Mejorar accesibilidad */
 .nav-customitem:focus,
 button:focus {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 /* Prevenir selección de texto en elementos interactivos */
 .nav-customitem,
 button {
-    user-select: none;
-    -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Animación de entrada/salida del sidebar en móvil */
+@media (max-width: 1023px) {
+  #sidebar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0 30px 30px 0;
+  }
+  #sidebar:not(.-translate-x-full) {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Asegurar que el contenido principal no se superponga */
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+  }
 }
