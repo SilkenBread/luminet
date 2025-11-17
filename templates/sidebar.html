@@ -95,7 +95,7 @@
             
             <div class="flex-1 min-w-0 overflow-hidden">
                 <p class="text-sm font-semibold text-gray-900 truncate">
-                    {{ user.get_full_name }}
+                    {{ user.get_short_name }}
                 </p>
                 {% if request.user.groups.first %}
                 <p class="text-xs text-gray-500 truncate">

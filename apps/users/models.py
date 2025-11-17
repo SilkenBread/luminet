@@ -229,6 +229,11 @@ class User(AbstractUser, BaseModel):
         item["gradient"] = self.get_gradient_colors()
         item["full_name"] = self.get_full_name()
         item["groups"] = [{"id": g.id, "name": g.name} for g in self.groups.all()]
+        # Incluir el nombre del área en lugar del ID
+        if self.fk_area:
+            item["fk_area"] = self.fk_area.name
+        else:
+            item["fk_area"] = None
         return item
 
 

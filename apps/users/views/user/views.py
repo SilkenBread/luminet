@@ -37,8 +37,8 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
             length = int(request.GET.get('length', 10))
             search = request.GET.get('search[value]', '')
             
-            # Filtrar usuarios
-            queryset = User.objects.all()
+            # Filtrar usuarios con select_related para optimizar la consulta
+            queryset = User.objects.select_related('fk_area').all()
             
             if search:
                 queryset = queryset.filter(

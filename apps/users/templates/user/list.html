@@ -95,6 +95,7 @@ $(document).ready(function() {
                 data: 'gradient',
                 orderable: false,
                 searchable: false,
+                className: 'flex justify-center',
                 render: function(data, type, row) {
                     const initial = row.username.charAt(0).toUpperCase();
                     return `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-${data.from} to-${data.to} flex items-center justify-center text-white font-semibold shadow-md ring-2 ring-gray-200">${initial}</div>`;
@@ -102,36 +103,42 @@ $(document).ready(function() {
             },
             {
                 data: 'username',
+                className: 'dt-center',
                 render: function(data, type, row) {
                     return `<span class="font-medium text-gray-900">${data}</span>`;
                 }
             },
             {
                 data: 'full_name',
+                className: 'dt-center',
                 render: function(data, type, row) {
                     return `<span class="text-gray-700">${data}</span>`;
                 }
             },
             {
                 data: 'email',
+                className: 'dt-center',
                 render: function(data, type, row) {
                     return `<a href="mailto:${data}" class="text-blue-600 hover:text-blue-800 hover:underline">${data}</a>`;
                 }
             },
             {
                 data: 'phone_number',
+                className: 'dt-center',
                 render: function(data, type, row) {
                     return data ? `<span class="text-gray-700">${data}</span>` : '<span class="text-gray-400">N/A</span>';
                 }
             },
             {
                 data: 'fk_area',
+                className: 'dt-center',
                 render: function(data, type, row) {
                     return data ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${data}</span>` : '<span class="text-gray-400">N/A</span>';
                 }
             },
             {
                 data: 'is_active',
+                className: 'dt-center',
                 render: function(data, type, row) {
                     if (data) {
                         return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -150,6 +157,7 @@ $(document).ready(function() {
                 data: null,
                 orderable: false,
                 searchable: false,
+                className: 'dt-center',
                 render: function(data, type, row) {
                     return `
                         <div class="flex items-center justify-center gap-2">
