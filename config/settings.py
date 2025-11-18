@@ -67,6 +67,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # Local context processors
+                'apps.infrastructure.context_processors.global_settings',
             ],
         },
     },
@@ -79,15 +81,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": env("POSTGRES_DB", default="luminet"),
-        "USER": env("POSTGRES_USER", default="luminet"),
-        "PASSWORD": env("POSTGRES_PASSWORD", default="luminet"),
-        "HOST": env("POSTGRES_HOST", default="db"),
-        "PORT": env("POSTGRES_PORT", default="5432"),
-    }
+    'default': env.db('DATABASE_URL')
 }
+DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 
 # Password validation
@@ -143,3 +139,17 @@ AUTH_USER_MODEL = "users.User"
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"
+
+# Session
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
+SESSION_COOKIE_NAME = 'session-luminet'
+SESSION_COOKIE_AGE = 14400
+SESSION_COOKIE_HTTPONLY = True
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
+DOMAIN = env('DOMAIN')
+
+GOOGLE_MAPS_API_KEY = env('GOOGLE_MAPS_API_KEY')

@@ -1,0 +1,167 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'lib/select2/select2.min.css' %}">
+{% endblock %}
+
+{% block content_main %}
+<div class="min-h-screen bg-gray-50">
+    {% include 'loader.html' %}
+    
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+            <div class="md:col-span-3">
+                <a href="{% url 'core:home' %}">
+                    <img src="" alt="Logo" class="w-3/5" />
+                </a>
+            </div>
+            <div class="md:col-span-9 flex items-center justify-end">
+                <h3 class="text-2xl font-bold text-gray-900">Reportar Daño de Alumbrado Público</h3>
+            </div>
+        </div>
+        <hr class="border-gray-300 mb-6"/>
+        
+        {% include 'components/report/headerPqrCreation.html' %}
+        {% include 'components/report/creationPqrStep1.html' %}
+        
+        <div id="step2" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style="display: none;">
+            <div class="p-6 bg-gray-50 border-b border-gray-200">
+                <div class="flex items-start p-4 bg-blue-50 border border-blue-200 rounded-lg" role="alert">
+                    <i data-lucide="utility-pole" class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <span class="text-sm text-blue-800">Estás reportando el Nodo <strong id="alert_node_reported" class="font-semibold"></strong></span>
+                    </div>
+                    <button type="button" class="text-blue-600 hover:text-blue-800" onclick="prevStep()">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form id="UserReportForm" class="needs-validation" novalidate>
+                <div class="p-6 border-b border-gray-200">
+                    <label for="typeDamage" class="block text-sm font-medium text-gray-700 mb-2">
+                        Tipo de daño:<span class="text-red-600"><b>*</b></span>
+                    </label>
+                    <select class="select2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                            name="typeDamage" id="typeDamage" required>
+                        <option value="">Selecciona un tipo de daño</option>
+                    </select>
+                    <div class="invalid-feedback text-red-600 text-sm mt-1">Por favor selecciona un tipo de daño</div>
+                </div>
+                
+                <div class="p-6 border-b border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Nombre:<span class="text-red-600"><b>*</b></span>
+                            </label>
+                            <input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                   type="text" pattern="^[A-Za-zá-úüñÁ-ÚÜÑ\s]+$" placeholder="Nombre quien recibe"
+                                   id="name" name="name" maxlength="100" autocomplete="off" required />
+                            <div class="invalid-feedback text-red-600 text-sm mt-1">Por favor escribe tu nombre</div>
+                        </div>
+                        
+                        <div>
+                            <label for="identification" class="block text-sm font-medium text-gray-700 mb-2">Identificación:</label>
+                            <input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                   type="text" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"
+                                   id="identification" name="identification" inputmode="tel" pattern="[0-9]+"
+                                   placeholder="Número de documento" minlength="7" maxlength="10" />
+                        </div>
+                        
+                        <div>
+                            <label for="contact_phoneNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                                Teléfono:<span class="text-red-600"><b>*</b></span>
+                            </label>
+                            <input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                   type="text" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"
+                                   id="contact_phoneNumber" name="contact_phoneNumber" inputmode="tel" pattern="^[0-9]+"
+                                   placeholder="Teléfono de contacto" minlength="7" maxlength="10" required />
+                            <div class="invalid-feedback text-red-600 text-sm mt-1">Por favor escribe tu número de teléfono</div>
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                Correo electrónico:<span class="text-red-600"><b>*</b></span>
+                            </label>
+                            <input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                   type="email" id="email" name="email" inputmode="email" placeholder="Correo Electrónico" required />
+                            <div class="invalid-feedback text-red-600 text-sm mt-1">Por favor escribe tu correo electrónico</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label for="observations" class="block text-sm font-medium text-gray-700 mb-2">
+                            Observaciones:<span class="text-red-600"><b>*</b></span>
+                        </label>
+                        <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                  id="observations" name="observations" rows="3"
+                                  placeholder="Escribe aquí tus observaciones..." maxlength="400" required></textarea>
+                        <div class="invalid-feedback text-red-600 text-sm mt-1">Por favor escribe tus observaciones</div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex items-start">
+                            <input type="checkbox" id="flexCheckDefault" required
+                                   class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500" />
+                            <label for="flexCheckDefault" class="ml-3 text-sm text-gray-700">
+                                Autorizo a EMCALI para que los datos personales que se consignan
+                                en el presente formulario, sean tratados conforme al aviso y a
+                                la política de privacidad, la cual he consultado en la página
+                                www.emcali.com.co en cumplimiento de la Ley 1581 de 2012.
+                                <a class="text-red-600 hover:text-red-700 underline" 
+                                   href="https://www.emcali.com.co/web/guest/proteccion-datos-personales/clientes-politica"
+                                   target="_blank">
+                                    Política de Tratamiento de Datos Personales.
+                                </a>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="hidden">
+                        <select class="select2 w-full" name="origin" id="origin">
+                            <option value="1" selected>Página web</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex justify-center">
+                        <button id="sendReport" type="submit"
+                                class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                            Crear reporte
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        {% include 'components/report/belowPqrCreation.html' %}
+        
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-500">
+                <i data-lucide="copyright" class="w-4 h-4 inline mr-1"></i>
+                2023. Desarrollado por UDPS (Unidad de Desarrollo de Productos y Servicios) de EMCALI Telecomunicaciones
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock content_main %}
+
+{% block extra_body_content %}
+<script src="{% static 'lib/select2/select2.min.js' %}"></script>
+<script src="{% static 'js/pqr/genericCreation.js' %}"></script>
+<script src="{% static 'creation/create.js' %}"></script>
+{% include 'sections/scriptGoogleMaps.html' %}
+<script>
+lucide.createIcons();
+function handleKeyPress(event) {
+    if (event.keyCode === 13) {
+        consultarDetalles();
+        return false;
+    }
+    return true;
+}
+</script>
+{% endblock extra_body_content %}

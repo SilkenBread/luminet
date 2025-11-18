@@ -8,4 +8,6 @@ urlpatterns = [
     # Applications
     path('login/', include('apps.login.urls')),
     path('users/', include('apps.users.urls')),
+    path('pqrs/', include('apps.pqrs.urls')),
+    path('infrastructure/', include('apps.infrastructure.urls')),
 ]

@@ -47,6 +47,34 @@
             </a>
         </li>
 
+        <!-- PQRs -->
+        <li>
+            <button type="button" data-submenu-target="pqrsSubmenu" class="nav-customitem w-full flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group">
+                <i data-lucide="clipboard-list" class="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-600 transition-colors duration-200"></i>
+                <span class="font-medium">PQRs</span>
+                <svg class="arrow-icon w-4 h-4 ml-auto text-gray-500 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            <!-- Submenú -->
+            <ul id="pqrsSubmenu" class="submenu hidden mt-1 space-y-1">
+                <li>
+                    <a href="{% url 'pqrs:list_receivepqr' %}" data-url="/pqrs/recibidas/" class="nav-customitem flex items-center px-4 py-2 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
+                        <i data-lucide="clipboard-check" class="w-4 h-4 mr-3 text-gray-400"></i>
+                        <span class="text-sm">Recibidas</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Zonas -->
+        <li>
+            <a href="#" class="nav-customitem flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group">
+                <i data-lucide="map" class="w-5 h-5 mr-3 text-gray-500 group-hover:text-blue-600 transition-colors duration-200"></i>
+                <span class="font-medium">Zonas</span>
+            </a>
+        </li>
+
         <!-- Infraestructura (Desplegable) -->
         <li>
             <button type="button" data-submenu-target="infraSubmenu" class="nav-customitem w-full flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group">

@@ -1,0 +1,21 @@
+<!-- Loader con Tailwind CSS -->
+<div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"></div>
+<div id="loader" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl p-8 flex flex-col items-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
+        <p class="text-gray-700 font-medium">Cargando...</p>
+    </div>
+</div>
+
+<script>
+// Funciones globales para mostrar/ocultar el loader
+window.showLoader = function() {
+    document.getElementById('loader').classList.remove('hidden');
+    document.getElementById('overlay').classList.remove('hidden');
+};
+
+window.hideLoader = function() {
+    document.getElementById('loader').classList.add('hidden');
+    document.getElementById('overlay').classList.add('hidden');
+};
+</script>

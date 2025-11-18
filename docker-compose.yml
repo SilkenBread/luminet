@@ -1,31 +1,4 @@
 services:
-  db:
-    image: postgis/postgis:16-3.4
-    container_name: luminet-db
-    restart: unless-stopped
-    
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB:-luminet}
-      - POSTGRES_USER=${POSTGRES_USER:-luminet}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-luminet}
-      - PGDATA=/var/lib/postgresql/data/pgdata
-      - TZ=America/Bogota
-    
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-luminet} -d ${POSTGRES_DB:-luminet}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    
-    networks:
-      - luminet-network
-
   web:
     build:
       context: .
@@ -59,9 +32,6 @@ services:
       # Mantener archivos estáticos y media persistentes
       - static_volume:/luminet/staticfiles
       - media_volume:/luminet/media
-      
-      # No sobrescribir db.sqlite3 si existe en el contenedor
-      - ./db.sqlite3:/luminet/db.sqlite3
     
     ports:
       - "${PORT:-8082}:8000"
@@ -74,17 +44,11 @@ services:
       retries: 3
       start_period: 40s
     
-    depends_on:
-      db:
-        condition: service_healthy
-    
     networks:
       - luminet-network
 
 # Volúmenes nombrados para persistencia
 volumes:
-  postgres_data:
-    name: luminet_postgres_data
   static_volume:
     name: luminet_static
   media_volume:

@@ -26,7 +26,7 @@ class PqrStateBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
     Clase genérica para listar los estados de una PQR usando Server Side Rendering
     """
     model = PqrActive
-    permission_required = ['pqr.view_pqractive']
+    permission_required = ['pqrs.view_pqractive']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -127,12 +127,13 @@ class PqrReceiveListView(PqrStateBaseListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'PQRs RECIBIDAS'
+        context['title'] = 'PQRs EN REVISIÓN'
         context['module'] = MODULE_NAME
-        context['entity'] = 'Recibidas'
-        context['create_url'] = reverse_lazy('pqr:create_internal_pqr')
-        context['externalcreate_url'] = reverse_lazy('pqr:create_pqr')
-        context['list_url'] = reverse_lazy('pqr:list_receivepqr')
+        context['entity'] = 'Revisión'
+        context['create_url'] = reverse_lazy('pqrs:create_internal_pqr')
+        context['externalcreate_url'] = reverse_lazy('pqrs:create_pqr')
+        context['list_url'] = reverse_lazy('pqrs:list_reviewpqr')
+        context['show_sidebar'] = True
         return context
 
 
@@ -186,19 +187,19 @@ class PqrReviewListView(PqrStateBaseListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'PQRs EN REVISIÓN'
+        context['title'] = 'PQRs RECIBIDAS'
         context['module'] = MODULE_NAME
-        context['entity'] = 'Revisión'
-        context['create_url'] = reverse_lazy('pqr:create_internal_pqr')
-        context['externalcreate_url'] = reverse_lazy('pqr:create_pqr')
-        context['list_url'] = reverse_lazy('pqr:list_reviewpqr')
+        context['entity'] = 'Recibidas'
+        context['create_url'] = reverse_lazy('pqrs:create_internal_pqr')
+        context['externalcreate_url'] = reverse_lazy('pqrs:create_pqr')
+        context['list_url'] = reverse_lazy('pqrs:list_receivepqr')
         return context
 
 
 class PqrAtendedListView(PqrStateBaseListView):
     model = PqrClosed
     template_name = 'list/state3.html'
-    permission_required = ['pqr.view_pqrclosed']
+    permission_required = ['pqrs.view_pqrclosed']
     status = None
 
     def get_query(self, request, status):
@@ -251,5 +252,5 @@ class PqrAtendedListView(PqrStateBaseListView):
         context['title'] = 'PQRs Atendidas'
         context['module'] = MODULE_NAME
         context['entity'] = 'Atendidas'
-        context['list_url'] = reverse_lazy('pqr:list_atendedpqr')
+        context['list_url'] = reverse_lazy('pqrs:list_atendedpqr')
         return context

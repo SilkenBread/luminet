@@ -1,0 +1,186 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block extra_css %}
+<!-- Select2 CSS -->
+<link rel="stylesheet" href="{% static 'lib/select2/select2.min.css' %}">
+{% endblock %}
+
+{% block content_main %}
+<div class="space-y-6">
+    <!--LOADER-->
+    {% include 'loader.html' %}
+    
+    <!--FORMULARIO CREACION PQR -->
+    {% include 'components/report/headerPqrCreation.html' %}
+    {% include 'components/report/creationPqrStep1.html' %}
+    
+    <!-- PASO 2 -->
+    <div id="step2" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style="display: none;">
+        <!-- Alerta informativa nodo reportado -->
+        <div class="p-6 bg-gray-50 border-b border-gray-200">
+            <div class="flex items-start p-4 bg-blue-50 border border-blue-200 rounded-lg" role="alert">
+                <i data-lucide="utility-pole" class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0"></i>
+                <div class="flex-1">
+                    <span class="text-sm text-blue-800">Estás reportando el Nodo <strong id="alert_node_reported" class="font-semibold"></strong></span>
+                </div>
+                <button type="button" class="text-blue-600 hover:text-blue-800" onclick="prevStep()">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <form id="UserReportForm" class="needs-validation" novalidate>
+            <!-- Tipo de daño -->
+            <div class="p-6 border-b border-gray-200">
+                <label for="typeDamage" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i data-lucide="shield-alert" class="w-4 h-4 inline mr-1"></i> Tipo de daño:
+                    <span class="text-red-600"><b>*</b></span>
+                </label>
+                <select class="select2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                        name="typeDamage" id="typeDamage" required>
+                    <option value="">Selecciona un tipo de daño</option>
+                </select>
+                <div class="invalid-feedback text-red-600 text-sm mt-1">
+                    Por favor selecciona un tipo de daño
+                </div>
+            </div>
+
+            <div class="p-6 border-b border-gray-200">
+                <div class="text-center mb-4">
+                    <button class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                            id="btn_get_reporter" type="button" onclick="openModalReporter()">
+                        <i data-lucide="search" class="w-4 h-4 mr-2"></i> Buscar Reportante
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nombre -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i data-lucide="pencil" class="w-4 h-4 inline mr-1"></i> Nombre:
+                            <span class="text-red-600"><b>*</b></span>
+                        </label>
+                        <input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                               type="text" pattern="^[A-Za-zá-úüñÁ-ÚÜÑ\s]+$" 
+                               placeholder="Nombre quien recibe" 
+                               id="name" name="name" maxlength="100" autocomplete="off" required/>
+                        <div class="invalid-feedback text-red-600 text-sm mt-1">
+                            Por favor escribe tu nombre
+                        </div>
+                    </div>
+
+                    <!-- Identificación -->
+                    <div>
+                        <label for="identification" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i data-lucide="contact" class="w-4 h-4 inline mr-1"></i> Identificación:
+                        </label>
+                        <input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                               type="text" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" 
+                               id="identification" name="identification" inputmode="tel" pattern="[0-9]+" 
+                               placeholder="Número de documento" minlength="7" maxlength="10"/>
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div>
+                        <label for="contact_phoneNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i data-lucide="phone" class="w-4 h-4 inline mr-1"></i> Teléfono:
+                            <span class="text-red-600"><b>*</b></span>
+                        </label>
+                        <input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                               type="text" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" 
+                               id="contact_phoneNumber" name="contact_phoneNumber" inputmode="tel" pattern="^[0-9]+" 
+                               placeholder="Teléfono de contacto" minlength="7" maxlength="10" required/>
+                        <div class="invalid-feedback text-red-600 text-sm mt-1">
+                            Por favor escribe tu número de teléfono
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i data-lucide="mail" class="w-4 h-4 inline mr-1"></i> Correo electrónico:
+                            <span class="text-red-600"><b>*</b></span>
+                        </label>
+                        <input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                               type="email" id="email" name="email" inputmode="email" 
+                               placeholder="Correo Electrónico" required/>
+                        <div class="invalid-feedback text-red-600 text-sm mt-1">
+                            Por favor escribe tu correo electrónico
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <!-- Observaciones -->
+                <div class="mb-4">
+                    <label for="observations" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="message-circle-more" class="w-4 h-4 inline mr-1"></i> Observaciones:
+                        <span class="text-red-600"><b>*</b></span>
+                    </label>
+                    <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                              id="observations" name="observations" rows="3" 
+                              placeholder="Escribe aquí tus observaciones..." maxlength="400" required></textarea>
+                    <div class="invalid-feedback text-red-600 text-sm mt-1">
+                        Por favor escribe tus observaciones
+                    </div>
+                </div>
+
+                <!-- Origen PQR -->
+                <div class="mb-6">
+                    <label for="origin" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="building-2" class="w-4 h-4 inline mr-1"></i> Origen del reporte:
+                        <span class="text-red-600"><b>*</b></span>
+                    </label>
+                    <select class="select2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                            name="origin" id="origin" required>
+                        <option value="">Selecciona el origen</option>
+                    </select>
+                </div>
+
+                <!-- Botón Enviar -->
+                <div class="flex justify-center">
+                    <button id="sendReport" 
+                            class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm" 
+                            type="submit">
+                        <i data-lucide="clipboard-plus" class="w-5 h-5 mr-2"></i> Crear reporte
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% include 'components/report/belowPqrCreation.html' %}
+    {% comment %} {% include 'modals/report/getReporter.html' %} {% endcomment %}
+
+    <div class="text-center mt-6">
+        <a class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors duration-200" 
+           onclick="window.history.go(-1); return false;">
+            <i data-lucide="chevron-left" class="w-4 h-4 mr-2"></i> Volver
+        </a>
+    </div>
+</div>
+{% endblock content_main %}
+
+{% block extra_body_content %}
+<!-- Select2 JS -->
+<script src="{% static 'lib/select2/select2.min.js' %}"></script>
+<script src="{% static 'js/pqr/genericCreation.js' %}"></script>
+<script src="{% static 'creation/create.js' %}"></script>
+
+{% include 'sections/scriptGoogleMaps.html' %}
+
+<script>
+lucide.createIcons();
+
+// Evento con tecla enter para buscar directamente por codigo de pintado
+function handleKeyPress(event) {
+    if (event.keyCode === 13) {
+        consultarDetalles();
+        return false; // Evitar que se ejecute el evento predeterminado del Enter
+    }
+    return true;
+}
+</script>
+{% endblock extra_body_content %}
