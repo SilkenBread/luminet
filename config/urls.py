@@ -9,5 +9,6 @@ urlpatterns = [
     path('login/', include('apps.login.urls')),
     path('users/', include('apps.users.urls')),
     path('pqrs/', include('apps.pqrs.urls')),
+    path('pqr/', include(('apps.pqrs.urls', 'pqrs'), namespace='pqr')),
     path('infrastructure/', include('apps.infrastructure.urls')),
 ]

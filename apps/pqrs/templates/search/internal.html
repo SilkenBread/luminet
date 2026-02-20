@@ -1,0 +1,14 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block content_main %}
+{% include 'search/components/search_content.html' %}
+{% endblock content_main %}
+
+{% block extra_body_content %}
+<script>
+if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+}
+</script>
+{% endblock extra_body_content %}

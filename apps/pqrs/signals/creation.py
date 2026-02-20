@@ -23,7 +23,7 @@ def send_email_pqr_creation(sender, instance, created, **kwargs):
 
         # Crear Reporter si la PQR tiene DNI, si esta creada actualizarla
         if instance.dni:
-            Report = apps.get_model('user', 'Reporter')
+            Report = apps.get_model('users', 'Reporter')
             reporter, created = Report.objects.get_or_create(dni = instance.dni)
             if reporter:
                 reporter.name = instance.name
