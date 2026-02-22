@@ -33,6 +33,26 @@
     <!-- Favicons -->
     <link href="{% static 'img/favicon.svg' %}" rel="icon">
 
+    <!-- Modal System CSS -->
+    <style>
+        .modal-overlay {
+            transition: opacity 0.2s ease-out;
+            opacity: 0;
+        }
+        .modal-overlay.modal-active {
+            opacity: 1;
+        }
+        .modal-overlay .modal-container {
+            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+            transform: scale(0.95) translateY(10px);
+            opacity: 0;
+        }
+        .modal-overlay.modal-active .modal-container {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    </style>
+
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -54,6 +74,9 @@
     </script>
     {% endif %}
     
+    <!-- Modal System JS -->
+    <script src="{% static 'js/modal.js' %}"></script>
+
     {% block extra_js %}{% endblock %}
 </body>
 

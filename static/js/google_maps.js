@@ -27,12 +27,6 @@ async function initMap() {
     $("#overlay").fadeOut();
 }
 
-function setLightMap() {
-    map.setOptions({
-        styles: [],
-    });
-}
-
 // Funcion para obtener el centro de un poligono
 function getCenter(polygon) {
     let bounds = new google.maps.LatLngBounds();

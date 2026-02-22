@@ -187,12 +187,13 @@ class PqrReviewListView(PqrStateBaseListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'PQRs RECIBIDAS'
+        context['title'] = 'PQRs EN REVISIÓN'
         context['module'] = MODULE_NAME
-        context['entity'] = 'Recibidas'
+        context['entity'] = 'Revisión'
         context['create_url'] = reverse_lazy('pqrs:create_internal_pqr')
         context['externalcreate_url'] = reverse_lazy('pqrs:create_pqr')
-        context['list_url'] = reverse_lazy('pqrs:list_receivepqr')
+        context['list_url'] = reverse_lazy('pqrs:list_reviewpqr')
+        context['show_sidebar'] = True
         return context
 
 

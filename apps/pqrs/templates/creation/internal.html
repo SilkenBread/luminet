@@ -3,7 +3,7 @@
 
 {% block extra_css %}
 <!-- Select2 CSS -->
-<link rel="stylesheet" href="{% static 'lib/select2/select2.min.css' %}">
+<link rel="stylesheet" href={% static 'lib/select2/css/select2.min.css' %} />
 {% endblock %}
 
 {% block content_main %}
@@ -165,7 +165,7 @@
 
 {% block extra_body_content %}
 <!-- Select2 JS -->
-<script src="{% static 'lib/select2/select2.min.js' %}"></script>
+<script src={% static 'lib/select2/js/select2.min.js' %}></script>
 <script src="{% static 'js/pqr/genericCreation.js' %}"></script>
 <script src="{% static 'creation/create.js' %}"></script>
 

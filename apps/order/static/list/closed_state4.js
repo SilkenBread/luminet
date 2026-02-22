@@ -1,5 +1,5 @@
 // ============================================================
-// PQR State 3 - Atendidas / Anuladas (Closed)
+// Order Closed State 4 - Cerradas
 // ============================================================
 
 function getCookie(name) {
@@ -18,9 +18,9 @@ function getCookie(name) {
 }
 
 let currentPage = 0;
-let pageSize = 10;
+let pageSize = 50;
 let currentOrder = 'id';
-let currentOrderDir = 'asc';
+let currentOrderDir = 'desc';
 let currentSearch = '';
 let totalRecords = 0;
 
@@ -31,9 +31,8 @@ let locateMarker = null;
 // Carga de datos
 // ============================================================
 
-function loadPqrsData() {
+function loadOrdersData() {
     const inicio = currentPage * pageSize;
-    const canceled = $('#toggleCanceled').is(':checked');
 
     $.ajax({
         url: window.location.pathname,
@@ -45,13 +44,13 @@ function loadPqrsData() {
             filtro: currentSearch,
             order_by: currentOrder,
             order_dir: currentOrderDir,
-            canceled: canceled
+            canceled: $('#toggleCanceled').is(':checked')
         },
         headers: { 'X-CSRFToken': getCookie('csrftoken') },
         beforeSend: function () {
-            $('#pqrsTable tbody').html(`
+            $('#ordersTable tbody').html(`
                 <tr>
-                    <td colspan="8" class="text-center py-8">
+                    <td colspan="7" class="text-center py-8">
                         <div class="flex items-center justify-center">
                             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                         </div>
@@ -75,16 +74,15 @@ function loadPqrsData() {
 }
 
 function renderTable(data) {
-    const tbody = $('#pqrsTable tbody');
+    const tbody = $('#ordersTable tbody');
     tbody.empty();
 
     if (!data || data.length === 0) {
-        const isCanceled = $('#toggleCanceled').is(':checked');
         tbody.html(`
             <tr>
-                <td colspan="8" class="text-center py-8 text-gray-500">
+                <td colspan="7" class="text-center py-8 text-gray-500">
                     <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 text-gray-400"></i>
-                    <p>No se encontraron PQRs ${isCanceled ? 'anuladas' : 'atendidas'}</p>
+                    <p>No se encontraron órdenes</p>
                 </td>
             </tr>
         `);
@@ -92,44 +90,43 @@ function renderTable(data) {
         return;
     }
 
-    data.forEach(pqr => {
+    data.forEach(ot => {
+        const statusBadge = ot.status === 0
+            ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Anulada</span>'
+            : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Cerrada</span>';
+
         const row = `
             <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm font-semibold text-blue-600">#${pqr.file_number || 'N/A'}</span>
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <span class="text-sm font-semibold text-blue-600">#${ot.id}</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm text-gray-700">${formatDate(pqr.date_creation)}</span>
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <span class="text-sm text-gray-700">${ot.fk_pqr__file_number || 'N/A'}</span>
                 </td>
-                <td class="px-6 py-4">
-                    <span class="text-sm font-medium text-gray-900">${pqr.name || 'N/A'}</span>
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <span class="text-sm text-gray-700">${ot.date_creation || 'N/A'}</span>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-4 py-4 whitespace-nowrap">
+                    ${getPriorityBadge(ot.fk_priority__name)}
+                </td>
+                <td class="px-4 py-4">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                        ${pqr.fk_type_damage__name || 'N/A'}
+                        ${ot.fk_internal_type_damage__name || 'N/A'}
                     </span>
                 </td>
-                <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        ${pqr.fk_origin__name || 'N/A'}
-                    </span>
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <span class="text-sm text-gray-700">${ot.fk_crew__name || 'Sin asignar'}</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm text-gray-700">${pqr.fk_node_reported__fk_district__fk_comuna__name || 'N/A'}</span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm text-gray-700">${pqr.fk_node_reported__fk_district__name || 'N/A'}</span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-4 py-4 whitespace-nowrap">
                     <div class="flex items-center justify-center gap-1">
-                        <button onclick="locatePqr(${pqr.id})"
+                        <button onclick="locateOrder(${ot.fk_pqr__id})"
                                 class="inline-flex items-center p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors duration-200"
                                 title="Ubicar en mapa">
                             <i data-lucide="map-pin" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="viewPqrDetail(${pqr.id})"
+                        <button onclick="viewPqrDetail(${ot.fk_pqr__id})"
                                 class="inline-flex items-center p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                                title="Ver detalle">
+                                title="Ver detalle PQR">
                             <i data-lucide="eye" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -146,14 +143,14 @@ function renderTable(data) {
 // Helpers
 // ============================================================
 
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    if (typeof dateString === 'string' && dateString.includes(' ')) return dateString;
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-CO', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit'
-    });
+function getPriorityBadge(priority) {
+    const colors = {
+        'Alta': 'bg-red-100 text-red-800',
+        'Media': 'bg-yellow-100 text-yellow-800',
+        'Baja': 'bg-gray-100 text-gray-800'
+    };
+    const cls = colors[priority] || 'bg-gray-100 text-gray-800';
+    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cls}">${priority || 'N/A'}</span>`;
 }
 
 function showError(message) {
@@ -168,7 +165,11 @@ function updatePagination() {
     const totalPages = Math.ceil(totalRecords / pageSize);
     const paginationContainer = $('#pagination-container');
 
-    if (totalPages <= 1) { paginationContainer.html(''); updateInfo(); return; }
+    if (totalPages <= 1) {
+        paginationContainer.html('');
+        updateInfo();
+        return;
+    }
 
     let html = '<div class="flex items-center gap-2">';
     html += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}
@@ -184,14 +185,17 @@ function updatePagination() {
         html += `<button onclick="changePage(0)" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">1</button>`;
         if (startPage > 1) html += '<span class="px-2 text-gray-500">...</span>';
     }
+
     for (let i = startPage; i <= endPage; i++) {
         const cls = i === currentPage ? 'bg-blue-600 text-white' : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50';
         html += `<button onclick="changePage(${i})" class="px-3 py-2 text-sm font-medium rounded-lg ${cls}">${i + 1}</button>`;
     }
+
     if (endPage < totalPages - 1) {
         if (endPage < totalPages - 2) html += '<span class="px-2 text-gray-500">...</span>';
         html += `<button onclick="changePage(${totalPages - 1})" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">${totalPages}</button>`;
     }
+
     html += `<button onclick="changePage(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}
               class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
               <i data-lucide="chevron-right" class="w-4 h-4"></i></button>`;
@@ -205,7 +209,9 @@ function updatePagination() {
 function updateInfo() {
     const start = currentPage * pageSize + 1;
     const end = Math.min((currentPage + 1) * pageSize, totalRecords);
-    const text = totalRecords > 0 ? `Mostrando ${start} a ${end} de ${totalRecords} registros` : 'No hay registros para mostrar';
+    const text = totalRecords > 0
+        ? `Mostrando ${start} a ${end} de ${totalRecords} registros`
+        : 'No hay registros para mostrar';
     $('#table-info').text(text);
 }
 
@@ -213,41 +219,45 @@ function changePage(page) {
     const totalPages = Math.ceil(totalRecords / pageSize);
     if (page < 0 || page >= totalPages) return;
     currentPage = page;
-    loadPqrsData();
+    loadOrdersData();
 }
 
-function changePageSize(size) { pageSize = parseInt(size); currentPage = 0; loadPqrsData(); }
-function searchPqrs() { currentSearch = $('#searchInput').val(); currentPage = 0; loadPqrsData(); }
-
-function sortBy(column) {
-    if (currentOrder === column) { currentOrderDir = currentOrderDir === 'asc' ? 'desc' : 'asc'; }
-    else { currentOrder = column; currentOrderDir = 'asc'; }
-    loadPqrsData();
+function searchOrders() {
+    currentSearch = $('#searchInput').val();
+    currentPage = 0;
+    loadOrdersData();
 }
 
 // ============================================================
-// ACCIONES: Ubicar PQR en mapa
+// ACCIONES
 // ============================================================
 
-function locatePqr(pqrId) {
-    const url = PQR_URLS.detail.replace('{id}', pqrId);
+function locateOrder(pqrId) {
+    const url = ORDER_URLS.pqrDetail.replace('{id}', pqrId);
+
     $.ajax({
-        url: url, type: 'GET',
+        url: url,
+        type: 'GET',
         headers: { 'X-CSRFToken': getCookie('csrftoken') },
         success: function (response) {
             if (response.type === 'success') {
                 const pqr = response.data;
                 const loc = pqr.node_location;
+
                 if (!loc || !loc.lat || !loc.lng) {
                     Swal.fire({ title: 'Sin ubicación', text: 'Este nodo no tiene coordenadas registradas.', icon: 'warning', confirmButtonColor: '#3b82f6' });
                     return;
                 }
+
                 $('#locatePqr_nodeInfo').text(pqr.str_node_reported || loc.painting_code || '-');
                 openModal('locatePqrModal');
+
                 setTimeout(function () {
                     const center = { lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) };
                     if (!locateMap) {
-                        locateMap = new google.maps.Map(document.getElementById('locatePqrMap'), { center: center, zoom: 17, mapTypeId: 'hybrid' });
+                        locateMap = new google.maps.Map(document.getElementById('locatePqrMap'), {
+                            center: center, zoom: 17, mapTypeId: 'hybrid'
+                        });
                         locateMarker = new google.maps.Marker({ position: center, map: locateMap });
                     } else {
                         locateMap.setCenter(center);
@@ -255,132 +265,90 @@ function locatePqr(pqrId) {
                     }
                     google.maps.event.trigger(locateMap, 'resize');
                 }, 300);
-            } else { showError(response.msg || 'Error al cargar la ubicación'); }
+            } else {
+                showError(response.msg || 'Error al cargar la ubicación');
+            }
         },
-        error: function () { showError('Error al obtener información del PQR'); }
+        error: function () {
+            showError('Error al obtener información');
+        }
     });
 }
 
-// ============================================================
-// ACCIONES: Ver detalle de PQR
-// ============================================================
-
 function viewPqrDetail(pqrId) {
-    const url = PQR_URLS.detail.replace('{id}', pqrId);
+    const url = ORDER_URLS.pqrDetail.replace('{id}', pqrId);
+
     $.ajax({
-        url: url, type: 'GET',
+        url: url,
+        type: 'GET',
         headers: { 'X-CSRFToken': getCookie('csrftoken') },
-        beforeSend: function () { Swal.fire({ title: 'Cargando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() }); },
+        beforeSend: function () {
+            Swal.fire({ title: 'Cargando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        },
         success: function (response) {
             Swal.close();
-            if (response.type === 'success') { populateReviewModal(response.data); openModal('reviewPqrModal'); }
-            else { showError(response.msg || 'Error al cargar el detalle'); }
+            if (response.type === 'success') {
+                populateReviewModal(response.data);
+                openModal('reviewPqrModal');
+            } else {
+                showError(response.msg || 'Error al cargar el detalle');
+            }
         },
-        error: function () { Swal.close(); showError('Error al obtener el detalle del PQR'); }
+        error: function () {
+            Swal.close();
+            showError('Error al obtener el detalle del PQR');
+        }
     });
 }
 
 function populateReviewModal(pqr) {
     $('#reviewPqr_fileNumber').text('#' + (pqr.file_number || ''));
-
-    const statusColors = { 'Recibida': 'bg-blue-100 text-blue-800', 'En revisión': 'bg-yellow-100 text-yellow-800', 'Atendida': 'bg-green-100 text-green-800', 'Anulada': 'bg-red-100 text-red-800' };
-    const statusClass = statusColors[pqr.status] || 'bg-gray-100 text-gray-800';
-    $('#reviewPqr_statusBadge').attr('class', `inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusClass}`).text(pqr.status || '-');
-    $('#reviewPqr_dateCreation').text(pqr.date_creation || '-');
-
+    const statusMap = { 0: { text: 'Anulado', cls: 'bg-red-100 text-red-800' }, 1: { text: 'Recibido', cls: 'bg-blue-100 text-blue-800' }, 2: { text: 'En proceso', cls: 'bg-yellow-100 text-yellow-800' }, 3: { text: 'Atendida', cls: 'bg-green-100 text-green-800' } };
+    const st = statusMap[pqr.status] || { text: 'Desconocido', cls: 'bg-gray-100 text-gray-800' };
+    $('#reviewPqr_statusBadge').html(`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${st.cls}">${st.text}</span>`);
     $('#reviewPqr_name').text(pqr.name || '-');
     $('#reviewPqr_dni').text(pqr.dni || '-');
-    $('#reviewPqr_phone').text(pqr.phone_number || '-');
+    $('#reviewPqr_phone').text(pqr.telephone || '-');
     $('#reviewPqr_email').text(pqr.email || '-');
-
-    $('#reviewPqr_typeDamage').text(pqr.fk_type_damage || '-');
-    $('#reviewPqr_origin').text(pqr.fk_origin || '-');
     $('#reviewPqr_node').text(pqr.str_node_reported || '-');
-    $('#reviewPqr_location').text((pqr.comuna ? pqr.comuna + ' - ' : '') + (pqr.district || '-'));
+    $('#reviewPqr_damageType').text(pqr.str_type_damage || '-');
+    $('#reviewPqr_origin').text(pqr.str_origin || '-');
     $('#reviewPqr_observation').text(pqr.observation || '-');
-
+    $('#reviewPqr_dateCreation').text(pqr.date_creation || '-');
     const routeBody = $('#reviewPqr_routeHistory');
     routeBody.empty();
     if (pqr.route_history && pqr.route_history.length > 0) {
-        pqr.route_history.forEach(route => {
-            routeBody.append(`<tr class="hover:bg-gray-50">
-                <td class="px-4 py-2 text-sm text-gray-700">${route.enum}</td>
-                <td class="px-4 py-2 text-sm text-gray-700">${route.state || '-'}</td>
-                <td class="px-4 py-2 text-sm text-gray-700">${route.input_date || '-'}</td>
-                <td class="px-4 py-2 text-sm text-gray-700">${route.output_date || '-'}</td>
-            </tr>`);
+        pqr.route_history.forEach((r, i) => {
+            routeBody.append(`<tr class="hover:bg-gray-50"><td class="px-4 py-2 text-sm text-gray-700">${i + 1}</td><td class="px-4 py-2 text-sm text-gray-700">${r.state || '-'}</td><td class="px-4 py-2 text-sm text-gray-700">${r.date_entry || '-'}</td><td class="px-4 py-2 text-sm text-gray-700">${r.date_exit || '-'}</td></tr>`);
         });
     } else {
-        routeBody.html('<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400">Sin registros</td></tr>');
+        routeBody.html('<tr><td colspan="4" class="text-center py-4 text-gray-400">Sin trazabilidad</td></tr>');
     }
-
     const ordersContainer = $('#reviewPqr_ordersContainer');
     ordersContainer.empty();
     if (pqr.orders && pqr.orders.length > 0) {
-        let html = '<div class="space-y-2">';
-        pqr.orders.forEach(order => {
-            html += `<div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
-                <div><span class="text-sm font-semibold text-indigo-600">#${order.id}</span>
-                <span class="text-sm text-gray-600 ml-2">${order.fk_internal_type_damage || ''}</span></div>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">${order.status || '-'}</span>
-            </div>`;
+        pqr.orders.forEach(o => {
+            ordersContainer.append(`<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">OT #${o.id}</span>`);
         });
-        html += '</div>';
-        ordersContainer.html(html);
     } else {
-        ordersContainer.html('<p class="text-sm text-gray-400 text-center py-3">Sin órdenes asociadas</p>');
+        ordersContainer.html('<span class="text-sm text-gray-400">Sin órdenes asociadas</span>');
     }
-    lucide.createIcons();
 }
 
 // ============================================================
-// Inicialización
+// Init
 // ============================================================
 
 $(document).ready(function () {
-    const controlsHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div class="flex items-center gap-2">
-                <label class="text-sm font-medium text-gray-700">Mostrar</label>
-                <select id="pageSizeSelect" onchange="changePageSize(this.value)"
-                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-                <label class="text-sm font-medium text-gray-700">registros</label>
-            </div>
-            <div class="flex items-center gap-2">
-                <label class="text-sm font-medium text-gray-700">Buscar:</label>
-                <input type="text" id="searchInput"
-                       class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                       placeholder="Buscar..."
-                       onkeyup="if(event.key === 'Enter') searchPqrs()">
-                <button onclick="searchPqrs()"
-                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-                    <i data-lucide="search" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </div>
-    `;
+    loadOrdersData();
 
-    const footerHTML = `
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
-            <div id="table-info" class="text-sm text-gray-700"></div>
-            <div id="pagination-container"></div>
-        </div>
-    `;
-
-    $('#pqrsTable').before(controlsHTML);
-    $('#pqrsTable').closest('.overflow-x-auto').after(footerHTML);
-
-    // Toggle listener
-    $('#toggleCanceled').on('change', function () {
-        currentPage = 0;
-        loadPqrsData();
+    $('#searchInput').on('keyup', function (e) {
+        if (e.key === 'Enter') searchOrders();
     });
 
-    lucide.createIcons();
-    loadPqrsData();
+    // Toggle canceled
+    $('#toggleCanceled').on('change', function () {
+        currentPage = 0;
+        loadOrdersData();
+    });
 });

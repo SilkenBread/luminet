@@ -1,0 +1,71 @@
+<!-- Modal: Crear Orden de Trabajo desde PQR -->
+<div id="createOrderModal" class="modal-overlay">
+    <div class="modal-container max-w-lg">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-t-xl px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i data-lucide="clipboard-plus" class="w-6 h-6 text-white"></i>
+                <h3 class="text-lg font-semibold text-white">Crear Orden de Trabajo</h3>
+            </div>
+            <button data-modal-close="createOrderModal" class="text-white/80 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-5">
+            <input type="hidden" id="createOrder_pqrId">
+
+            <!-- Tipo Daño Interno -->
+            <div>
+                <label for="createOrder_damageType" class="block text-sm font-medium text-gray-700 mb-1">
+                    Tipo de Daño Interno <span class="text-red-500">*</span>
+                </label>
+                <select id="createOrder_damageType" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" required>
+                    <option value="">Selecciona un tipo de daño</option>
+                </select>
+            </div>
+
+            <!-- Prioridad -->
+            <div>
+                <label for="createOrder_priority" class="block text-sm font-medium text-gray-700 mb-1">
+                    Prioridad <span class="text-red-500">*</span>
+                </label>
+                <select id="createOrder_priority" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" required>
+                    <option value="">Selecciona la prioridad</option>
+                </select>
+            </div>
+
+            <!-- Tiempo de Reparación -->
+            <div>
+                <label for="createOrder_timing" class="block text-sm font-medium text-gray-700 mb-1">
+                    Tiempo de Reparación <span class="text-red-500">*</span>
+                </label>
+                <select id="createOrder_timing" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" required>
+                    <option value="">Selecciona el tiempo</option>
+                </select>
+            </div>
+
+            <!-- Observaciones Internas -->
+            <div>
+                <label for="createOrder_observation" class="block text-sm font-medium text-gray-700 mb-1">
+                    Observaciones Internas <span class="text-red-500">*</span>
+                </label>
+                <textarea id="createOrder_observation" rows="4" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="Ingrese las observaciones internas..." required></textarea>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 rounded-b-xl px-6 py-4 flex justify-end gap-3">
+            <button data-modal-close="createOrderModal"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                Cancelar
+            </button>
+            <button onclick="confirmCreateOrder()"
+                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">
+                <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                Crear Orden
+            </button>
+        </div>
+    </div>
+</div>

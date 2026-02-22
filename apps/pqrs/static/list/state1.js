@@ -1,3 +1,7 @@
+// ============================================================
+// PQR State 1 - Recibidas (Received)
+// ============================================================
+
 // Función helper para obtener el CSRF token
 function getCookie(name) {
     let cookieValue = null;
@@ -22,10 +26,17 @@ let currentOrderDir = 'asc';
 let currentSearch = '';
 let totalRecords = 0;
 
-// Función para cargar datos
-function loadPqrsData(draw = 1) {
+// Variable global para el mapa de ubicación
+let locateMap = null;
+let locateMarker = null;
+
+// ============================================================
+// Carga de datos y renderización
+// ============================================================
+
+function loadPqrsData() {
     const inicio = currentPage * pageSize;
-    
+
     $.ajax({
         url: window.location.pathname,
         type: 'POST',
@@ -37,10 +48,8 @@ function loadPqrsData(draw = 1) {
             order_by: currentOrder,
             order_dir: currentOrderDir
         },
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        beforeSend: function() {
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        beforeSend: function () {
             $('#pqrsTable tbody').html(`
                 <tr>
                     <td colspan="8" class="text-center py-8">
@@ -51,7 +60,7 @@ function loadPqrsData(draw = 1) {
                 </tr>
             `);
         },
-        success: function(response) {
+        success: function (response) {
             if (response.type === 'success') {
                 totalRecords = response.length;
                 renderTable(response.objects);
@@ -60,19 +69,17 @@ function loadPqrsData(draw = 1) {
                 showError(response.msg || 'Error al cargar los datos');
             }
         },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
+        error: function () {
             showError('No se pudieron cargar los datos');
         }
     });
 }
 
-// Función para renderizar la tabla
 function renderTable(data) {
     const tbody = $('#pqrsTable tbody');
     tbody.empty();
-    
-    if (data.length === 0) {
+
+    if (!data || data.length === 0) {
         tbody.html(`
             <tr>
                 <td colspan="8" class="text-center py-8 text-gray-500">
@@ -84,7 +91,7 @@ function renderTable(data) {
         lucide.createIcons();
         return;
     }
-    
+
     data.forEach(pqr => {
         const row = `
             <tr class="hover:bg-gray-50 transition-colors">
@@ -115,25 +122,25 @@ function renderTable(data) {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center justify-center gap-1">
-                        <button onclick="locatePqr(${pqr.id})" 
+                        <button onclick="locatePqr(${pqr.id})"
                                 class="inline-flex items-center p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors duration-200"
                                 title="Ubicar en mapa">
                             <i data-lucide="map-pin" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="viewPqrDetail(${pqr.id})" 
+                        <button onclick="viewPqrDetail(${pqr.id})"
                                 class="inline-flex items-center p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors duration-200"
                                 title="Ver detalle">
                             <i data-lucide="eye" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="sendToReview(${pqr.id}, '${pqr.file_number}')" 
+                        <button onclick="sendToReview(${pqr.id}, '${pqr.file_number}')"
                                 class="inline-flex items-center p-2 text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50 rounded-lg transition-colors duration-200"
                                 title="Enviar a revisión">
                             <i data-lucide="send" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="createOrder(${pqr.id})" 
-                                class="inline-flex items-center p-2 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors duration-200"
-                                title="Crear orden">
-                            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                        <button onclick="openRejectPqr(${pqr.id}, '${pqr.file_number}')"
+                                class="inline-flex items-center p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                                title="Anular PQR">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
                         </button>
                     </div>
                 </td>
@@ -141,116 +148,87 @@ function renderTable(data) {
         `;
         tbody.append(row);
     });
-    
-    // Reinicializar iconos de Lucide
+
     lucide.createIcons();
 }
 
-// Función para formatear fecha
+// ============================================================
+// Helpers
+// ============================================================
+
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
+    // If already formatted by Django (e.g. "2024-01-15 02:30 PM")
+    if (typeof dateString === 'string' && dateString.includes(' ')) return dateString;
     const date = new Date(dateString);
     return date.toLocaleDateString('es-CO', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
     });
 }
 
-// Función para actualizar paginación
+function showError(message) {
+    Swal.fire({ title: 'Error', text: message, icon: 'error', confirmButtonColor: '#3b82f6' });
+}
+
+// ============================================================
+// Paginación
+// ============================================================
+
 function updatePagination() {
     const totalPages = Math.ceil(totalRecords / pageSize);
     const paginationContainer = $('#pagination-container');
-    
+
     if (totalPages <= 1) {
         paginationContainer.html('');
         updateInfo();
         return;
     }
-    
-    let paginationHTML = '<div class="flex items-center gap-2">';
-    
-    // Botón anterior
-    paginationHTML += `
-        <button onclick="changePage(${currentPage - 1})" 
-                ${currentPage === 0 ? 'disabled' : ''}
-                class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-            <i data-lucide="chevron-left" class="w-4 h-4"></i>
-        </button>
-    `;
-    
-    // Páginas
-    const maxVisiblePages = 5;
-    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
-    
-    if (endPage - startPage < maxVisiblePages - 1) {
-        startPage = Math.max(0, endPage - maxVisiblePages + 1);
-    }
-    
+
+    let html = '<div class="flex items-center gap-2">';
+    html += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}
+              class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i></button>`;
+
+    const maxVisible = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) startPage = Math.max(0, endPage - maxVisible + 1);
+
     if (startPage > 0) {
-        paginationHTML += `
-            <button onclick="changePage(0)" 
-                    class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                1
-            </button>
-        `;
-        if (startPage > 1) {
-            paginationHTML += '<span class="px-2 text-gray-500">...</span>';
-        }
+        html += `<button onclick="changePage(0)" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">1</button>`;
+        if (startPage > 1) html += '<span class="px-2 text-gray-500">...</span>';
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
-        const isActive = i === currentPage;
-        paginationHTML += `
-            <button onclick="changePage(${i})" 
-                    class="px-3 py-2 text-sm font-medium rounded-lg ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'}">
-                ${i + 1}
-            </button>
-        `;
+        const cls = i === currentPage ? 'bg-blue-600 text-white' : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50';
+        html += `<button onclick="changePage(${i})" class="px-3 py-2 text-sm font-medium rounded-lg ${cls}">${i + 1}</button>`;
     }
-    
+
     if (endPage < totalPages - 1) {
-        if (endPage < totalPages - 2) {
-            paginationHTML += '<span class="px-2 text-gray-500">...</span>';
-        }
-        paginationHTML += `
-            <button onclick="changePage(${totalPages - 1})" 
-                    class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                ${totalPages}
-            </button>
-        `;
+        if (endPage < totalPages - 2) html += '<span class="px-2 text-gray-500">...</span>';
+        html += `<button onclick="changePage(${totalPages - 1})" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">${totalPages}</button>`;
     }
-    
-    // Botón siguiente
-    paginationHTML += `
-        <button onclick="changePage(${currentPage + 1})" 
-                ${currentPage >= totalPages - 1 ? 'disabled' : ''}
-                class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-            <i data-lucide="chevron-right" class="w-4 h-4"></i>
-        </button>
-    `;
-    
-    paginationHTML += '</div>';
-    paginationContainer.html(paginationHTML);
+
+    html += `<button onclick="changePage(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}
+              class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i></button>`;
+    html += '</div>';
+
+    paginationContainer.html(html);
     lucide.createIcons();
     updateInfo();
 }
 
-// Función para actualizar información de registros
 function updateInfo() {
     const start = currentPage * pageSize + 1;
     const end = Math.min((currentPage + 1) * pageSize, totalRecords);
-    const infoText = totalRecords > 0 
+    const text = totalRecords > 0
         ? `Mostrando ${start} a ${end} de ${totalRecords} registros`
         : 'No hay registros para mostrar';
-    
-    $('#table-info').text(infoText);
+    $('#table-info').text(text);
 }
 
-// Función para cambiar página
 function changePage(page) {
     const totalPages = Math.ceil(totalRecords / pageSize);
     if (page < 0 || page >= totalPages) return;
@@ -258,21 +236,18 @@ function changePage(page) {
     loadPqrsData();
 }
 
-// Función para cambiar tamaño de página
 function changePageSize(size) {
     pageSize = parseInt(size);
     currentPage = 0;
     loadPqrsData();
 }
 
-// Función para buscar
 function searchPqrs() {
     currentSearch = $('#searchInput').val();
     currentPage = 0;
     loadPqrsData();
 }
 
-// Función para ordenar
 function sortBy(column) {
     if (currentOrder === column) {
         currentOrderDir = currentOrderDir === 'asc' ? 'desc' : 'asc';
@@ -283,38 +258,169 @@ function sortBy(column) {
     loadPqrsData();
 }
 
-// Función para mostrar error
-function showError(message) {
-    Swal.fire({
-        title: 'Error',
-        text: message,
-        icon: 'error',
-        confirmButtonColor: '#3b82f6'
+// ============================================================
+// ACCIONES: Ubicar PQR en mapa
+// ============================================================
+
+function locatePqr(pqrId) {
+    const url = PQR_URLS.detail.replace('{id}', pqrId);
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: function (response) {
+            if (response.type === 'success') {
+                const pqr = response.data;
+                const loc = pqr.node_location;
+
+                if (!loc || !loc.lat || !loc.lng) {
+                    Swal.fire({ title: 'Sin ubicación', text: 'Este nodo no tiene coordenadas registradas.', icon: 'warning', confirmButtonColor: '#3b82f6' });
+                    return;
+                }
+
+                // Populate header info
+                $('#locatePqr_nodeInfo').text(pqr.str_node_reported || loc.painting_code || '-');
+
+                // Open modal first so the map container is visible
+                openModal('locatePqrModal');
+
+                // Initialize or re-center map after a small delay (DOM needs to render)
+                setTimeout(function () {
+                    const center = { lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) };
+
+                    if (!locateMap) {
+                        locateMap = new google.maps.Map(document.getElementById('locatePqrMap'), {
+                            center: center,
+                            zoom: 17,
+                            mapTypeId: 'hybrid'
+                        });
+                        locateMarker = new google.maps.Marker({ position: center, map: locateMap });
+                    } else {
+                        locateMap.setCenter(center);
+                        locateMarker.setPosition(center);
+                    }
+
+                    google.maps.event.trigger(locateMap, 'resize');
+                }, 300);
+            } else {
+                showError(response.msg || 'Error al cargar la ubicación');
+            }
+        },
+        error: function () {
+            showError('Error al obtener información del PQR');
+        }
     });
 }
 
-// Funciones de acciones
-function locatePqr(pqrId) {
-    // TODO: Implementar lógica para ubicar en mapa
-    console.log('Ubicar PQR:', pqrId);
-    Swal.fire({
-        title: 'Ubicar en Mapa',
-        text: 'Funcionalidad en desarrollo',
-        icon: 'info',
-        confirmButtonColor: '#3b82f6'
-    });
-}
+// ============================================================
+// ACCIONES: Ver detalle de PQR
+// ============================================================
 
 function viewPqrDetail(pqrId) {
-    // TODO: Implementar lógica para ver detalle
-    console.log('Ver detalle PQR:', pqrId);
-    Swal.fire({
-        title: 'Ver Detalle',
-        text: 'Funcionalidad en desarrollo',
-        icon: 'info',
-        confirmButtonColor: '#3b82f6'
+    const url = PQR_URLS.detail.replace('{id}', pqrId);
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        beforeSend: function () {
+            Swal.fire({ title: 'Cargando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        },
+        success: function (response) {
+            Swal.close();
+            if (response.type === 'success') {
+                populateReviewModal(response.data);
+                openModal('reviewPqrModal');
+            } else {
+                showError(response.msg || 'Error al cargar el detalle');
+            }
+        },
+        error: function () {
+            Swal.close();
+            showError('Error al obtener el detalle del PQR');
+        }
     });
 }
+
+function populateReviewModal(pqr) {
+    // Header
+    $('#reviewPqr_fileNumber').text('#' + (pqr.file_number || ''));
+
+    // Status badge
+    const statusColors = {
+        'Recibida': 'bg-blue-100 text-blue-800',
+        'En revisión': 'bg-yellow-100 text-yellow-800',
+        'Atendida': 'bg-green-100 text-green-800',
+        'Anulada': 'bg-red-100 text-red-800'
+    };
+    const statusClass = statusColors[pqr.status] || 'bg-gray-100 text-gray-800';
+    $('#reviewPqr_statusBadge').attr('class', `inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusClass}`).text(pqr.status || '-');
+
+    // Dates
+    $('#reviewPqr_dateCreation').text(pqr.date_creation || '-');
+
+    // Reporter info
+    $('#reviewPqr_name').text(pqr.name || '-');
+    $('#reviewPqr_dni').text(pqr.dni || '-');
+    $('#reviewPqr_phone').text(pqr.phone_number || '-');
+    $('#reviewPqr_email').text(pqr.email || '-');
+
+    // Report info
+    $('#reviewPqr_typeDamage').text(pqr.fk_type_damage || '-');
+    $('#reviewPqr_origin').text(pqr.fk_origin || '-');
+    $('#reviewPqr_node').text(pqr.str_node_reported || '-');
+    $('#reviewPqr_location').text((pqr.comuna ? pqr.comuna + ' - ' : '') + (pqr.district || '-'));
+    $('#reviewPqr_observation').text(pqr.observation || '-');
+
+    // Route history (trazabilidad)
+    const routeBody = $('#reviewPqr_routeHistory');
+    routeBody.empty();
+    if (pqr.route_history && pqr.route_history.length > 0) {
+        pqr.route_history.forEach(route => {
+            routeBody.append(`
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2 text-sm text-gray-700">${route.enum}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700">${route.state || '-'}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700">${route.input_date || '-'}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700">${route.output_date || '-'}</td>
+                </tr>
+            `);
+        });
+    } else {
+        routeBody.html('<tr><td colspan="4" class="px-4 py-3 text-center text-gray-400">Sin registros</td></tr>');
+    }
+
+    // Associated orders
+    const ordersContainer = $('#reviewPqr_ordersContainer');
+    ordersContainer.empty();
+    if (pqr.orders && pqr.orders.length > 0) {
+        let ordersHtml = '<div class="space-y-2">';
+        pqr.orders.forEach(order => {
+            ordersHtml += `
+                <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+                    <div>
+                        <span class="text-sm font-semibold text-indigo-600">#${order.id}</span>
+                        <span class="text-sm text-gray-600 ml-2">${order.fk_internal_type_damage || ''}</span>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        ${order.status || '-'}
+                    </span>
+                </div>
+            `;
+        });
+        ordersHtml += '</div>';
+        ordersContainer.html(ordersHtml);
+    } else {
+        ordersContainer.html('<p class="text-sm text-gray-400 text-center py-3">Sin órdenes asociadas</p>');
+    }
+
+    lucide.createIcons();
+}
+
+// ============================================================
+// ACCIONES: Enviar a revisión (Estado 1 → 2)
+// ============================================================
 
 function sendToReview(pqrId, fileNumber) {
     Swal.fire({
@@ -329,40 +435,126 @@ function sendToReview(pqrId, fileNumber) {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // TODO: Implementar lógica para enviar a revisión
-            console.log('Enviar a revisión:', pqrId);
-            Swal.fire({
-                title: '¡Enviado!',
-                text: 'La PQR ha sido enviada a revisión',
-                icon: 'success',
-                confirmButtonColor: '#3b82f6',
-                timer: 2000
-            }).then(() => {
-                loadPqrsData();
+            $.ajax({
+                url: PQR_URLS.statusChange,
+                type: 'POST',
+                data: { pqr: pqrId, state: 2 },
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                success: function (response) {
+                    if (response.type === 'success') {
+                        Swal.fire({
+                            title: '¡Enviado!',
+                            text: `La PQR #${fileNumber} ha sido enviada a revisión`,
+                            icon: 'success',
+                            confirmButtonColor: '#3b82f6',
+                            timer: 2000
+                        }).then(() => loadPqrsData());
+                    } else {
+                        showError(response.msg || 'Error al cambiar el estado');
+                    }
+                },
+                error: function () {
+                    showError('Error al enviar la PQR a revisión');
+                }
             });
         }
     });
 }
 
-function createOrder(pqrId) {
-    // TODO: Implementar lógica para crear orden
-    console.log('Crear orden para PQR:', pqrId);
+// ============================================================
+// ACCIONES: Anular PQR (Reject)
+// ============================================================
+
+function openRejectPqr(pqrId, fileNumber) {
+    // Set hidden fields
+    $('#rejectPqr_id').val(pqrId);
+    $('#rejectPqr_fileNumber').text('#' + fileNumber);
+
+    // Load causes via GET
+    const causeSelect = $('#rejectPqr_cause');
+    causeSelect.html('<option value="">Cargando causas...</option>');
+
+    $.ajax({
+        url: PQR_URLS.reject,
+        type: 'GET',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: function (response) {
+            if (response.type === 'success') {
+                causeSelect.html('<option value="">Seleccione una causa...</option>');
+                response.data.forEach(cause => {
+                    causeSelect.append(`<option value="${cause.id}">${cause.name}</option>`);
+                });
+            } else {
+                causeSelect.html('<option value="">Error al cargar causas</option>');
+            }
+        },
+        error: function () {
+            causeSelect.html('<option value="">Error al cargar causas</option>');
+        }
+    });
+
+    openModal('rejectPqrModal');
+    lucide.createIcons();
+}
+
+function confirmRejectPqr() {
+    const pqrId = $('#rejectPqr_id').val();
+    const causeId = $('#rejectPqr_cause').val();
+
+    if (!causeId) {
+        Swal.fire({ title: 'Atención', text: 'Debe seleccionar una causa de anulación', icon: 'warning', confirmButtonColor: '#3b82f6' });
+        return;
+    }
+
     Swal.fire({
-        title: 'Crear Orden',
-        text: 'Funcionalidad en desarrollo',
-        icon: 'info',
-        confirmButtonColor: '#3b82f6'
+        title: '¿Anular PQR?',
+        text: 'Esta acción no se puede deshacer. La PQR será anulada permanentemente.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, anular',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: PQR_URLS.reject,
+                type: 'POST',
+                data: { pqr: pqrId, cause: causeId },
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                success: function (response) {
+                    if (response.type === 'success') {
+                        closeModal('rejectPqrModal');
+                        Swal.fire({
+                            title: '¡Anulada!',
+                            text: 'La PQR ha sido anulada exitosamente',
+                            icon: 'success',
+                            confirmButtonColor: '#3b82f6',
+                            timer: 2000
+                        }).then(() => loadPqrsData());
+                    } else {
+                        showError(response.msg || 'Error al anular la PQR');
+                    }
+                },
+                error: function () {
+                    showError('Error al anular la PQR');
+                }
+            });
+        }
     });
 }
 
-// Inicialización cuando el DOM esté listo
-$(document).ready(function() {
-    // Crear controles de paginación y búsqueda
+// ============================================================
+// Inicialización
+// ============================================================
+
+$(document).ready(function () {
     const controlsHTML = `
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-gray-700">Mostrar</label>
-                <select id="pageSizeSelect" onchange="changePageSize(this.value)" 
+                <select id="pageSizeSelect" onchange="changePageSize(this.value)"
                         class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
                     <option value="10">10</option>
                     <option value="25">25</option>
@@ -373,31 +565,28 @@ $(document).ready(function() {
             </div>
             <div class="flex items-center gap-2">
                 <label class="text-sm font-medium text-gray-700">Buscar:</label>
-                <input type="text" id="searchInput" 
+                <input type="text" id="searchInput"
                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                        placeholder="Buscar..."
                        onkeyup="if(event.key === 'Enter') searchPqrs()">
-                <button onclick="searchPqrs()" 
+                <button onclick="searchPqrs()"
                         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
                     <i data-lucide="search" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
     `;
-    
+
     const footerHTML = `
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
             <div id="table-info" class="text-sm text-gray-700"></div>
             <div id="pagination-container"></div>
         </div>
     `;
-    
+
     $('#pqrsTable').before(controlsHTML);
     $('#pqrsTable').closest('.overflow-x-auto').after(footerHTML);
-    
-    // Inicializar iconos
+
     lucide.createIcons();
-    
-    // Cargar datos iniciales
     loadPqrsData();
 });
