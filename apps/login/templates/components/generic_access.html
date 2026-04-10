@@ -5,37 +5,47 @@
 
 {% block content %}
 <style>
-    body {
-        overflow-y: hidden; /* Hide vertical scrollbar */
-        overflow-x: hidden; /* Hide horizontal scrollbar */
+    :root {
+        --luminet-primary: #0E2A4A;
+        --luminet-primary-soft: #183e67;
+        --luminet-primary-muted: #e8eef5;
+        --luminet-accent: #F19124;
     }
 </style>
-<body class="overflow-hidden">
-    <main>
-        <div class="flex justify-center items-center h-screen overflow-hidden">
-            <!-- Left side - Video section -->
-            <div id="left-side" class="w-1/2 h-full hidden lg:block relative overflow-hidden bg-gradient-to-br from-blue-600 to-purple-700">
-                <video id="image-login" autoplay loop muted class="absolute inset-0 w-full h-full object-cover opacity-60">
-                    {% if not request|is_mobile %}
-                        <source src="{% static 'media/highway.mp4' %}" type="video/mp4">
-                    {% endif %}
-                </video>
-                <div class="absolute inset-0 bg-black bg-opacity-20"></div>
-                <div class="relative z-10 flex items-center justify-center w-full h-full p-12">
-                    <div class="text-white text-center">
-                        <h1 class="text-5xl font-bold mb-4">Bienvenido a Luminet</h1>
-                        <p class="text-xl opacity-90">Sistema de gestión integral</p>
-                    </div>
+<main class="min-h-screen overflow-hidden bg-gradient-to-br from-slate-100 to-white">
+    <div class="flex min-h-screen">
+        <!-- Left side - Brand section -->
+        <section id="left-side" class="relative hidden h-screen w-1/2 overflow-hidden lg:block">
+            <video id="image-login" autoplay loop muted class="absolute inset-0 h-full w-full object-cover">
+                {% if not request|is_mobile %}
+                    <source src="{% static 'media/highway.mp4' %}" type="video/mp4">
+                {% endif %}
+            </video>
+            <div class="absolute inset-0 bg-[#0E2A4A]/55"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-[#0E2A4A]/42 via-[#0E2A4A]/55 to-black/45"></div>
+            <div class="relative z-10 flex h-full w-full items-center justify-center p-14">
+                <div class="max-w-xl text-white">
+                    <span class="inline-flex items-center rounded-full border border-white/30 bg-white/10 px-4 py-1 text-sm font-medium">
+                        Plataforma Operativa Luminet
+                    </span>
+                    <h1 class="mt-6 text-5xl font-semibold leading-tight">
+                        Control inteligente para el alumbrado publico
+                    </h1>
+                    <p class="mt-5 text-lg text-slate-100/90">
+                        Centraliza incidentes, ordenes de trabajo y seguimiento operativo desde una sola experiencia.
+                    </p>
+                    <div class="mt-8 h-1.5 w-28 rounded-full bg-[#F19124]"></div>
                 </div>
             </div>
-            <!-- Right side - Form section -->
-            <div id="right-side" class="w-full lg:w-1/2 h-full flex items-center justify-center">
-                {% block right_body %}
-                {% endblock right_body %}
-            </div>
-        </div>
-    </main>
-</body>
+        </section>
+
+        <!-- Right side - Form section -->
+        <section id="right-side" class="flex h-screen w-full items-center justify-center bg-slate-50 px-6 py-12 lg:w-1/2 lg:px-12">
+            {% block right_body %}
+            {% endblock right_body %}
+        </section>
+    </div>
+</main>
 {% endblock content %}
 
 {% block extra_css %}
