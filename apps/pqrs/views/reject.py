@@ -1,5 +1,7 @@
 # standard library
+import json
 import time
+from urllib.parse import parse_qs
 
 # Django
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,6 +21,39 @@ from ..models import PqrActive, CauseRejectPqr
 
 class PqrRejectAPI(LoginRequiredMixin, APIPermissionValidation, View):
     permission_required = ['pqrs.change_pqractive']
+
+    def _get_request_payload(self, request):
+        """
+        Normaliza parámetros recibidos por form-data o JSON.
+        Soporta llaves legacy (id_pqr/id_cause) y actuales (pqr/cause).
+        """
+        payload = {}
+
+        if request.POST:
+            payload.update(request.POST.dict())
+
+        if request.body:
+            body_text = ''
+            try:
+                body_text = request.body.decode('utf-8')
+            except UnicodeDecodeError:
+                body_text = ''
+
+            try:
+                json_payload = json.loads(body_text)
+                if isinstance(json_payload, dict):
+                    payload.update(json_payload)
+            except json.JSONDecodeError:
+                pass
+
+            # Soporta body tipo "pqr=4&cause=1" aunque llegue como texto plano.
+            if body_text:
+                query_payload = parse_qs(body_text, keep_blank_values=True)
+                for key, values in query_payload.items():
+                    if values:
+                        payload[key] = values[0]
+
+        return payload
 
     @transaction.atomic
     def pqr_annulment(self, **params):
@@ -81,11 +116,20 @@ class PqrRejectAPI(LoginRequiredMixin, APIPermissionValidation, View):
         return JsonResponse(data, safe=False)
 
     def post(self, request, *args, **kwargs):
+        start_time = time.time()
         try:
-            start_time = time.time()
+            payload = self._get_request_payload(request)
+            pqr_id = payload.get('id_pqr') or payload.get('pqr')
+            cause_id = payload.get('id_cause') or payload.get('cause')
+
+            if not pqr_id:
+                raise Exception("Parámetro requerido faltante: id_pqr (o pqr)")
+            if not cause_id:
+                raise Exception("Parámetro requerido faltante: id_cause (o cause)")
+
             params = {
-                'pqr': get_object_or_404(PqrActive, id=int(request.POST['id_pqr'])),
-                'cause': get_object_or_404(CauseRejectPqr, id=int(request.POST['id_cause'])),
+                'pqr': get_object_or_404(PqrActive, id=int(pqr_id)),
+                'cause': get_object_or_404(CauseRejectPqr, id=int(cause_id)),
                 'user': request.user
             }
             # Anulación de PQR
