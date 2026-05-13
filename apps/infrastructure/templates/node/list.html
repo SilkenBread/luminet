@@ -1,0 +1,186 @@
+{% extends 'body.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'lib/select2/css/select2.min.css' %}">
+<link rel="stylesheet" href="{% static 'lib/datatables/datatables.min.css' %}">
+<style>
+    /* Panel deslizante (offcanvas) de infraestructura */
+    #nodeInfraPanel {
+        transition: transform .3s ease-out;
+    }
+    #nodeInfraPanel.hidden-panel {
+        transform: translateX(100%);
+    }
+    /* Pin para AdvancedMarkerElement */
+    .lm-pin {
+        background: #2563eb;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,.25);
+        white-space: nowrap;
+        transform: translateY(-50%);
+    }
+    /* Select2 + Tailwind compatibility tweaks */
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border-color: #d1d5db;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        padding: 0 8px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+{% endblock %}
+
+{% block content_main %}
+<div class="space-y-4">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+            <p class="mt-1 text-sm text-gray-500">Visualiza, ubica y administra los nodos de infraestructura.</p>
+        </div>
+        <div class="flex gap-2">
+            <button id="btnReloadData"
+                    class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
+                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                Actualizar
+            </button>
+            <button id="btnOpenCreate"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-sm">
+                <i data-lucide="map-pin-plus" class="w-4 h-4 mr-2"></i>
+                Crear Nodo
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout: mapa + panel derecho -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+        <!-- Mapa -->
+        <div class="xl:col-span-7 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div id="map" class="w-full" style="height: 75vh; min-height: 500px;"></div>
+        </div>
+
+        <!-- Panel derecho: filtros + tabla -->
+        <div class="xl:col-span-5 space-y-4">
+            <!-- Filtros -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
+                <h2 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <i data-lucide="filter" class="w-4 h-4 text-blue-600"></i>
+                    Filtros
+                </h2>
+
+                <!-- Búsqueda por código pintado -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Código pintado (7 dígitos)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="inputPaintingCode" inputmode="numeric"
+                               pattern="[0-9]{7}" maxlength="7" minlength="7"
+                               placeholder="0000000"
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <button id="btnSearchByCode"
+                                class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                                title="Buscar">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Selector Comuna -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Comuna</label>
+                    <select id="selectComuna" class="w-full">
+                        <option value="">Todas las comunas</option>
+                    </select>
+                </div>
+
+                <!-- Selector Barrio -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Barrio</label>
+                    <select id="selectDistrict" class="w-full" disabled>
+                        <option value="">Seleccione una comuna primero</option>
+                    </select>
+                </div>
+
+                <button id="btnClearFilters"
+                        class="w-full inline-flex items-center justify-center px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium rounded-lg transition">
+                    <i data-lucide="x" class="w-3.5 h-3.5 mr-1"></i>
+                    Limpiar filtros
+                </button>
+            </div>
+
+            <!-- Tabla -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-4">
+                    <h2 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-3">
+                        <i data-lucide="table" class="w-4 h-4 text-blue-600"></i>
+                        Listado de Nodos
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table id="nodesTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pintado</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Barrio</th>
+                                    <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modales -->
+{% include 'node/modals/nodeForm.html' %}
+{% include 'node/modals/nodeInfrastructure.html' %}
+
+{% endblock content_main %}
+
+
+{% block extra_body_content %}
+<!-- URLs expuestas al JS -->
+<script>
+    const NODE_URLS = {
+        listData: "{% url 'infrastructure:list_nodes' %}",
+        create: "{% url 'infrastructure:api_node_create' %}",
+        detail: "{% url 'infrastructure:api_node_detail' pk=0 %}".replace('/0/', '/__pk__/'),
+        delete: "{% url 'infrastructure:api_node_delete' pk=0 %}".replace('/0/', '/__pk__/'),
+        infrastructure: "{% url 'infrastructure:node_infrastructure' pk=0 %}".replace('/0/', '/__pk__/'),
+        byPaintingCode: "{% url 'infrastructure:search_node' painting_code=0 %}".replace('/0/', '/__code__/'),
+        byComuna: "{% url 'infrastructure:nodes_by_comuna' %}",
+        byDistrict: "{% url 'infrastructure:nodes_by_district' %}",
+        comunas: "{% url 'infrastructure:api_comunas' %}",
+        districtsByComuna: "{% url 'infrastructure:api_districts_by_comuna' comuna=0 %}".replace('/0/', '/__pk__/'),
+    };
+    const MAP_ID = "{{ GOOGLE_MAPS_MAP_ID|default:'' }}";
+</script>
+
+<!-- Librerías -->
+<link rel="stylesheet" href="{% static 'lib/datatables/datatables.min.css' %}">
+<script src="{% static 'lib/select2/js/select2.min.js' %}"></script>
+<script src="{% static 'lib/datatables/datatables.min.js' %}"></script>
+
+<!-- MarkerClusterer moderno (Google Maps oficial) -->
+<script src="https://unpkg.com/@googlemaps/markerclusterer@2.5.3/dist/index.min.js"></script>
+
+<!-- Google Maps + helpers globales -->
+{% include 'sections/scriptGoogleMaps.html' %}
+
+<!-- JS del módulo Node -->
+<script src="{% static 'node/markers.js' %}"></script>
+<script src="{% static 'node/list.js' %}"></script>
+
+{% endblock extra_body_content %}
