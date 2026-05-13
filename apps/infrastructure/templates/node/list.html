@@ -162,6 +162,7 @@
         byPaintingCode: "{% url 'infrastructure:search_node' painting_code=0 %}".replace('/0/', '/__code__/'),
         byComuna: "{% url 'infrastructure:nodes_by_comuna' %}",
         byDistrict: "{% url 'infrastructure:nodes_by_district' %}",
+        byArea: "{% url 'infrastructure:nodes_in_area' %}",
         comunas: "{% url 'infrastructure:api_comunas' %}",
         districtsByComuna: "{% url 'infrastructure:api_districts_by_comuna' comuna=0 %}".replace('/0/', '/__pk__/'),
     };

@@ -27,7 +27,14 @@ def _serialize_node(node):
 
 
 class NodeInDistrictView(LoginRequiredMixin, APIPermissionValidation, View):
-    """Buscar todos los nodos de un barrio."""
+    """
+    DEPRECATED. Buscar todos los nodos de un barrio.
+
+    El flujo actual del mapa pinta marcadores vía NodeSearchInArea (bbox del
+    viewport) y la tabla los lista paginada vía NodeListView. Este endpoint
+    serializa la totalidad del barrio en un único response y no es usado por la
+    UI; se conserva por compat. Eliminar en una limpieza posterior.
+    """
     permission_required = ["infrastructure.view_node"]
 
     def get(self, request, *args, **kwargs):
@@ -86,44 +93,87 @@ class NodeSearchId(LoginRequiredMixin, APIPermissionValidation, View):
 
 
 class NodeSearchInArea(LoginRequiredMixin, APIPermissionValidation, View):
-    """Buscar nodos en un área alrededor de un punto."""
+    """
+    Buscar nodos en un área del mapa.
+
+    Modos soportados:
+    - bbox: ?west=&south=&east=&north=  → todos los nodos dentro del viewport.
+    - punto+radio: ?lat=&lng=            → nodos cercanos al punto (compat. legacy).
+    """
     permission_required = ["infrastructure.view_node"]
 
     DEFAULT_DISTANCE = 0.0010  # ~110m en grados WGS84
+    MAX_BBOX_RESULTS = 5000
+
+    def _bbox_response(self, request):
+        try:
+            west = float(request.GET["west"])
+            south = float(request.GET["south"])
+            east = float(request.GET["east"])
+            north = float(request.GET["north"])
+        except (KeyError, ValueError):
+            raise ValueError("Parámetros bbox inválidos (west/south/east/north).")
+
+        bbox_wkt = (
+            f"POLYGON(({west} {south}, {east} {south}, "
+            f"{east} {north}, {west} {north}, {west} {south}))"
+        )
+        bbox = GEOSGeometry(bbox_wkt, srid=4326)
+
+        # Payload mínimo para render de marcadores: id, painting_code, lng, lat.
+        # Evitamos construir instancias Node y joinear a District/Comuna: los nombres
+        # se piden on-demand al hacer click (endpoint detail).
+        rows = list(
+            Node.objects
+            .filter(location__within=bbox)
+            .values_list("id", "painting_code", "location")[: self.MAX_BBOX_RESULTS + 1]
+        )
+        truncated = len(rows) > self.MAX_BBOX_RESULTS
+        data = [
+            {"id": pk, "pk": pk, "painting_code": code, "lng": loc.x, "lat": loc.y}
+            for pk, code, loc in rows[: self.MAX_BBOX_RESULTS]
+            if loc is not None
+        ]
+        return {"type": "success", "data": data, "truncated": truncated}
+
+    def _point_radius_response(self, request):
+        longitud = request.GET.get("lng")
+        latitud = request.GET.get("lat")
+        if not (latitud and longitud):
+            raise ValueError("No ha ingresado coordenadas válidas para la consulta.")
+
+        punto = GEOSGeometry(f"POINT({longitud} {latitud})", srid=4326)
+        queryset = (
+            Node.objects
+            .select_related("fk_district__fk_comuna")
+            .filter(location__distance_lte=(punto, self.DEFAULT_DISTANCE))
+        )
+
+        geojson_str = serialize(
+            "geojson",
+            queryset=queryset,
+            fields=("pk", "location", "painting_code", "fk_district"),
+            geometry_field="location",
+        )
+        geojson = json.loads(geojson_str)
+
+        node_by_pk = {n.pk: n for n in queryset}
+        for feature in geojson.get("features", []):
+            pk = feature.get("properties", {}).get("pk") or feature.get("id")
+            node = node_by_pk.get(pk)
+            if node and node.fk_district:
+                feature["properties"]["district"] = node.fk_district.name
+                feature["properties"]["comuna"] = node.fk_district.fk_comuna.name
+
+        return {"type": "success", "data": geojson}
 
     def get(self, request, *args, **kwargs):
         start_time = time.time()
         try:
-            longitud = request.GET.get("lng")
-            latitud = request.GET.get("lat")
-            if not (latitud and longitud):
-                raise ValueError("No ha ingresado coordenadas válidas para la consulta.")
-
-            punto = GEOSGeometry(f"POINT({longitud} {latitud})", srid=4326)
-            queryset = (
-                Node.objects
-                .select_related("fk_district__fk_comuna")
-                .filter(location__distance_lte=(punto, self.DEFAULT_DISTANCE))
-            )
-
-            geojson_str = serialize(
-                "geojson",
-                queryset=queryset,
-                fields=("pk", "location", "painting_code", "fk_district"),
-                geometry_field="location",
-            )
-            geojson = json.loads(geojson_str)
-
-            # Adjuntar nombre de barrio y comuna sin disparar más queries (ya hay select_related)
-            node_by_pk = {n.pk: n for n in queryset}
-            for feature in geojson.get("features", []):
-                pk = feature.get("properties", {}).get("pk") or feature.get("id")
-                node = node_by_pk.get(pk)
-                if node and node.fk_district:
-                    feature["properties"]["district"] = node.fk_district.name
-                    feature["properties"]["comuna"] = node.fk_district.fk_comuna.name
-
-            data = {"type": "success", "data": geojson}
+            if "west" in request.GET:
+                data = self._bbox_response(request)
+            else:
+                data = self._point_radius_response(request)
         except Exception as e:
             data = {"type": "error", "msg": str(e)}
         data["time"] = str(time.time() - start_time)
@@ -170,7 +220,14 @@ SearchInfratructureInNodeView = SearchInfrastructureInNodeView
 
 
 class NodeSearchComunaView(LoginRequiredMixin, APIPermissionValidation, View):
-    """Buscar nodos por comuna."""
+    """
+    DEPRECATED. Buscar nodos por comuna.
+
+    El flujo actual del mapa pinta marcadores vía NodeSearchInArea (bbox del
+    viewport) y la tabla los lista paginada vía NodeListView. Este endpoint
+    serializa la totalidad de la comuna en un único response y no es usado por
+    la UI; se conserva por compat. Eliminar en una limpieza posterior.
+    """
     permission_required = ["infrastructure.view_node"]
 
     def get(self, request, *args, **kwargs):

@@ -6,14 +6,21 @@ async function initMap() {
         new google.maps.LatLng(3.5485267251372963, -76.45883778721213)
     );
 
-    map = new google.maps.Map(document.getElementById("map"), {
+    const mapOptions = {
         center: CENTER,
         zoom: 12,
         clickableIcons: false,
         restriction: {
             latLngBounds: map_bounds,
         },
-    });
+    };
+
+    // mapId es requerido por AdvancedMarkerElement; debe pasarse al construir.
+    if (typeof MAP_ID !== "undefined" && MAP_ID) {
+        mapOptions.mapId = MAP_ID;
+    }
+
+    map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
     // Validar si es movil o no para configurar los gestos de zoom de Google Maps.
     var isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);

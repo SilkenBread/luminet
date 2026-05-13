@@ -12,6 +12,7 @@
         map: null,
         clusterer: null,
         markers: [],
+        markersById: new Map(),  // pool de marcadores por id para diffs incrementales
         comunaPolygons: [],
         districtPolygons: [],
         comunasCache: null,
@@ -27,6 +28,12 @@
 
     const COMUNAS_CACHE_KEY = "lm:comunas:v1";
     const COMUNAS_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+
+    // Carga por viewport: por debajo de este zoom no pedimos nodos (el bbox es demasiado grande)
+    const VIEWPORT_MIN_ZOOM = 14;
+    const VIEWPORT_DEBOUNCE_MS = 350;
+    let viewportTimer = null;
+    let viewportRequestId = 0;
 
     // ============================================================
     // Helpers
@@ -83,11 +90,6 @@
         state.map = window.map;
         state.infoWindow = new google.maps.InfoWindow();
 
-        // Map ID requerido para AdvancedMarkerElement con polígonos visibles
-        if (typeof MAP_ID !== "undefined" && MAP_ID) {
-            try { state.map.setOptions({ mapId: MAP_ID }); } catch (_) { /* no-op */ }
-        }
-
         await loadComunas();
         drawComunaPolygons();
         populateComunaSelect();
@@ -98,6 +100,7 @@
         initInfraPanelHandlers();
         initMapClick();
         initDataTable();
+        initViewportLoader();
     };
 
     // ============================================================
@@ -221,25 +224,108 @@
 
     function clearAllMarkers() {
         if (state.clusterer) state.clusterer.clearMarkers();
-        state.markers = NodeMarkers.clearMarkers(state.markers);
+        NodeMarkers.clearMarkers(state.markers);
+        state.markers = [];
+        state.markersById.clear();
     }
 
+    /**
+     * Render incremental: sólo crea marcadores nuevos y elimina los que ya no aplican.
+     * Los marcadores que persisten entre dos llamadas no se tocan — esto es lo que
+     * permite que pan/zoom sea fluido aunque haya miles de nodos en pantalla.
+     */
     function renderNodes(nodes) {
-        clearAllMarkers();
-        const created = nodes
-            .filter((n) => n.lat != null && n.lng != null)
-            .map((n) => {
-                const m = NodeMarkers.createMarker({
-                    map: state.map,
-                    position: { lat: parseFloat(n.lat), lng: parseFloat(n.lng) },
-                    title: n.painting_code,
-                    node: n,
-                });
-                NodeMarkers.addClickListener(m, () => openNodeInfoWindow(n, m));
-                return m;
+        const incomingIds = new Set();
+        const toAdd = [];
+
+        for (const n of nodes) {
+            if (n.lat == null || n.lng == null) continue;
+            const id = n.pk != null ? n.pk : n.id;
+            if (id == null) continue;
+            incomingIds.add(id);
+            if (state.markersById.has(id)) continue;
+
+            const marker = NodeMarkers.createMarker({
+                map: state.map,
+                position: { lat: parseFloat(n.lat), lng: parseFloat(n.lng) },
+                title: n.painting_code,
+                node: n,
             });
-        state.markers = created;
-        if (state.clusterer) state.clusterer.addMarkers(created);
+            NodeMarkers.addClickListener(marker, () => openNodeInfoWindow(n, marker));
+            state.markersById.set(id, marker);
+            toAdd.push(marker);
+        }
+
+        const toRemove = [];
+        for (const [id, marker] of state.markersById) {
+            if (!incomingIds.has(id)) {
+                toRemove.push(marker);
+                state.markersById.delete(id);
+            }
+        }
+
+        if (state.clusterer) {
+            if (toRemove.length) state.clusterer.removeMarkers(toRemove);
+            if (toAdd.length) state.clusterer.addMarkers(toAdd);
+        }
+        toRemove.forEach((m) => NodeMarkers.removeMarker(m));
+
+        state.markers = Array.from(state.markersById.values());
+    }
+
+    // ============================================================
+    // Carga por viewport (sin filtros activos)
+    // ============================================================
+    function hasActiveFilter() {
+        return Boolean(state.currentComunaId || state.currentDistrictId);
+    }
+
+    function reloadDataTable() {
+        if (state.dataTable) state.dataTable.ajax.reload(null, false);
+    }
+
+    function initViewportLoader() {
+        state.map.addListener("idle", () => {
+            if (viewportTimer) clearTimeout(viewportTimer);
+            viewportTimer = setTimeout(loadNodesInViewport, VIEWPORT_DEBOUNCE_MS);
+        });
+    }
+
+    async function loadNodesInViewport() {
+        const filterActive = hasActiveFilter();
+
+        // Sin filtro activo: exigir zoom mínimo para no traer toda la ciudad de golpe.
+        // Con filtro: el bbox ya está acotado por la comuna/barrio, sin importar el zoom.
+        if (!filterActive) {
+            const zoom = state.map.getZoom();
+            if (zoom == null || zoom < VIEWPORT_MIN_ZOOM) {
+                clearAllMarkers();
+                return;
+            }
+        }
+
+        const bounds = state.map.getBounds();
+        if (!bounds) return;
+
+        const sw = bounds.getSouthWest();
+        const ne = bounds.getNorthEast();
+        const params = new URLSearchParams({
+            west: sw.lng(),
+            south: sw.lat(),
+            east: ne.lng(),
+            north: ne.lat(),
+        });
+
+        const requestId = ++viewportRequestId;
+        try {
+            const response = await getJson(NODE_URLS.byArea + "?" + params.toString());
+            // Descartar respuestas obsoletas (el usuario siguió moviéndose)
+            if (requestId !== viewportRequestId) return;
+
+            if (response.type === "success") {
+                renderNodes(response.data || []);
+            }
+        } catch (_) { /* errores transitorios de red → silenciar */ }
     }
 
     function openNodeInfoWindow(node, marker) {
@@ -290,36 +376,32 @@
                     .append('<option value="">Seleccione una comuna primero</option>')
                     .prop("disabled", true);
                 clearAllMarkers();
+                reloadDataTable();
+                loadNodesInViewport();
                 return;
             }
 
             const districts = await loadDistrictsForComuna(comunaId);
             drawDistrictPolygons(districts);
             populateDistrictSelect(districts);
+            // fitBounds dispara 'idle' → el viewport-loader pinta los marcadores que entran en cuadro.
             fitMapToPolygons(state.districtPolygons);
-
-            const response = await getJson(NODE_URLS.byComuna + "?comuna=" + encodeURIComponent(comunaId));
-            if (response.type === "success") {
-                renderNodes(response.data || []);
-            } else {
-                showError(response.msg || "No se pudieron cargar los nodos de la comuna.");
-            }
+            reloadDataTable();
         });
 
-        $("#selectDistrict").on("change", async function () {
+        $("#selectDistrict").on("change", function () {
             const districtId = $(this).val();
             state.currentDistrictId = districtId || null;
-            if (!districtId) return;
-
-            const response = await getJson(NODE_URLS.byDistrict + "?district=" + encodeURIComponent(districtId));
-            if (response.type === "success") {
-                renderNodes(response.data || []);
-                // Zoom al polígono del distrito
-                const districtPolys = state.districtPolygons.filter((p) => p._meta && p._meta.id === parseInt(districtId, 10));
-                if (districtPolys.length) fitMapToPolygons(districtPolys);
-            } else {
-                showError(response.msg || "No se pudieron cargar los nodos del barrio.");
+            if (!districtId) {
+                reloadDataTable();
+                return;
             }
+            // Zoom al polígono del barrio → idle → viewport-loader pinta marcadores.
+            const districtPolys = state.districtPolygons.filter(
+                (p) => p._meta && p._meta.id === parseInt(districtId, 10)
+            );
+            if (districtPolys.length) fitMapToPolygons(districtPolys);
+            reloadDataTable();
         });
 
         $("#btnSearchByCode").on("click", searchByPaintingCode);
@@ -365,6 +447,8 @@
         clearAllMarkers();
         state.map.setCenter(CENTER);
         state.map.setZoom(12);
+        reloadDataTable();
+        // Tras el setZoom/setCenter, Google dispara 'idle' y se recarga por viewport
     }
 
     // ============================================================
@@ -533,6 +617,8 @@
             $("#selectDistrict").trigger("change");
         } else if (state.currentComunaId) {
             $("#selectComuna").trigger("change");
+        } else {
+            loadNodesInViewport();
         }
     }
 
@@ -652,10 +738,15 @@
         state.dataTable = $("#nodesTable").DataTable({
             processing: true,
             serverSide: true,
+            deferLoading: 0,  // arranca vacía; no dispara request hasta que haya filtro
             ajax: {
                 url: NODE_URLS.listData,
                 type: "POST",
                 headers: { "X-CSRFToken": getCookie("csrftoken") || "" },
+                data: function (d) {
+                    if (state.currentDistrictId) d.district_id = state.currentDistrictId;
+                    else if (state.currentComunaId) d.comuna_id = state.currentComunaId;
+                },
             },
             columns: [
                 { data: "id" },
@@ -701,9 +792,20 @@
             order: [[0, "desc"]],
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100],
-            language: { url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/es-CO.json" },
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/es-CO.json",
+                emptyTable: "Selecciona una comuna o acerca el mapa para ver nodos.",
+            },
             drawCallback: function () {
                 if (window.lucide) lucide.createIcons();
+                // Fallback: si la versión cargada de i18n sobreescribe emptyTable, lo forzamos
+                // sólo cuando no hay filtro activo.
+                if (!hasActiveFilter()) {
+                    const $empty = $("#nodesTable tbody td.dataTables_empty");
+                    if ($empty.length) {
+                        $empty.text("Selecciona una comuna o acerca el mapa para ver nodos.");
+                    }
+                }
             },
         });
     }

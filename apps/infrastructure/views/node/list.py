@@ -32,7 +32,15 @@ class NodeListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, DataTabl
     }
 
     def get_initial_queryset(self, request):
-        return Node.objects.select_related("fk_district__fk_comuna").all()
+        qs = Node.objects.select_related("fk_district__fk_comuna")
+        district_id = request.POST.get("district_id")
+        comuna_id = request.POST.get("comuna_id")
+        if district_id and district_id.isdigit():
+            return qs.filter(fk_district_id=int(district_id))
+        if comuna_id and comuna_id.isdigit():
+            return qs.filter(fk_district__fk_comuna_id=int(comuna_id))
+        # Sin filtro activo: no se devuelve nada para evitar escanear toda la tabla.
+        return Node.objects.none()
 
     def serialize_row(self, node):
         return {

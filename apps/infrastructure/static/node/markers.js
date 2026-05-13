@@ -12,40 +12,76 @@
         return wrapper;
     }
 
+    // Ícono ligero compartido entre todos los marcadores en modo "bulk".
+    // Es una referencia única → Google Maps optimiza el render a canvas y evita un DOM por pin.
+    let DOT_ICON = null;
+    function getDotIcon() {
+        if (DOT_ICON) return DOT_ICON;
+        DOT_ICON = {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 5,
+            fillColor: "#2563eb",
+            fillOpacity: 0.95,
+            strokeColor: "#ffffff",
+            strokeWeight: 1.5,
+        };
+        return DOT_ICON;
+    }
+
     /**
-     * Crea un marcador moderno (AdvancedMarkerElement) si está disponible y MAP_ID está configurado;
-     * de lo contrario usa google.maps.Marker como fallback.
+     * Crea un marcador.
+     *
+     * - draggable=true (crear/editar): usa AdvancedMarkerElement con pin visible cuando hay MAP_ID,
+     *   o google.maps.Marker con label como fallback. Es un único marcador a la vez, su coste no importa.
+     * - draggable=false (visualización masiva): siempre google.maps.Marker con un ícono SVG
+     *   compartido. Esto permite renderizado optimizado en canvas y elimina el coste de DOM por pin,
+     *   que es lo que hacía lenta la navegación cuando hay miles de nodos visibles.
      */
     function createMarker({ map, position, title, node, draggable = false, useMapId = true }) {
-        const canUseAdvanced =
-            useMapId &&
-            window.google &&
-            google.maps &&
-            google.maps.marker &&
-            google.maps.marker.AdvancedMarkerElement &&
-            typeof MAP_ID !== "undefined" &&
-            MAP_ID;
+        if (draggable) {
+            const canUseAdvanced =
+                useMapId &&
+                window.google &&
+                google.maps &&
+                google.maps.marker &&
+                google.maps.marker.AdvancedMarkerElement &&
+                typeof MAP_ID !== "undefined" &&
+                MAP_ID;
 
-        if (canUseAdvanced) {
-            const m = new google.maps.marker.AdvancedMarkerElement({
+            if (canUseAdvanced) {
+                const m = new google.maps.marker.AdvancedMarkerElement({
+                    map,
+                    position,
+                    title: String(title),
+                    content: makePinContent(node || { painting_code: title }),
+                    gmpDraggable: true,
+                });
+                m._isAdvanced = true;
+                m._node = node;
+                return m;
+            }
+
+            const m = new google.maps.Marker({
                 map,
                 position,
                 title: String(title),
-                content: makePinContent(node || { painting_code: title }),
-                gmpDraggable: draggable,
+                draggable: true,
+                label: node && node.painting_code
+                    ? { text: String(node.painting_code), fontSize: "10px" }
+                    : undefined,
             });
-            m._isAdvanced = true;
+            m._isAdvanced = false;
             m._node = node;
             return m;
         }
 
-        // Fallback clásico (sigue funcionando incluso sin MAP_ID)
+        // Marker liviano para visualización masiva.
         const m = new google.maps.Marker({
             map,
             position,
-            title: String(title),
-            draggable,
-            label: node && node.painting_code ? { text: String(node.painting_code), fontSize: "10px" } : undefined,
+            title: String(title || ""),
+            icon: getDotIcon(),
+            optimized: true,
         });
         m._isAdvanced = false;
         m._node = node;
