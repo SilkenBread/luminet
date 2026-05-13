@@ -23,7 +23,7 @@ class Zone(BaseModel):
     name = models.CharField(
         max_length=255, unique=True, blank=False, null=False, verbose_name="Nombre"
     )
-    # comunas = models.ManyToManyField(Comuna, blank=True, verbose_name="Comunas")
+    comunas = models.ManyToManyField("infrastructure.Comuna", blank=True, verbose_name="Comunas")
     fk_area = models.ForeignKey(
         "Area", on_delete=models.PROTECT, blank=True, null=True, verbose_name="Área"
     )

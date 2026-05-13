@@ -49,11 +49,12 @@ class ZoneAdmin(admin.ModelAdmin):
     list_filter = ['fk_area', 'date_creation']
     search_fields = ['name', 'fk_area__name']
     readonly_fields = ['date_creation', 'date_updated', 'user_creation', 'user_updated']
+    filter_horizontal = ('comunas',)
     ordering = ['name']
     
     fieldsets = (
         ('Información General', {
-            'fields': ('name', 'fk_area', 'color')
+            'fields': ('name', 'fk_area', 'comunas', 'color')
         }),
         ('Auditoría', {
             'fields': ('date_creation', 'date_updated', 'user_creation', 'user_updated'),
