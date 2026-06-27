@@ -41,3 +41,5 @@ weasyprint==64.0
 
 # Emails
 resend==2.19.0
+
+django-extensions

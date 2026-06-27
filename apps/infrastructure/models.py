@@ -18,7 +18,7 @@ from simple_history.models import HistoricalRecords
 # local Django
 from apps.infrastructure.choices import *
 from apps.models import BaseModel
-# from apps.telemanagement.models import SmartPhotocell
+from apps.telemanagement.models import SmartPhotocell
 
 
 """
@@ -855,7 +855,7 @@ class Luminaire(BaseModel):
         blank=True, null=True, verbose_name="Fecha instalación"
     )
     # Telegestion
-    # fk_photocell_smart = models.OneToOneField(SmartPhotocell, on_delete=models.PROTECT, blank=True, null=True, verbose_name='Fotocelda inteligente')
+    fk_photocell_smart = models.OneToOneField(SmartPhotocell, on_delete=models.PROTECT, blank=True, null=True, verbose_name='Fotocelda inteligente')
     historical = HistoricalRecords()
 
     class Meta:

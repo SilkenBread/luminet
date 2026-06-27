@@ -38,8 +38,9 @@ THIRD_PARTY_APPS = [
     "debug_toolbar",
     "leaflet",
     "colorfield",
+    "django_extensions",
 ]
-LOCAL_APPS = ["apps.core", "apps.users", "apps.login", "apps.infrastructure", "apps.pqrs", "apps.order"]
+LOCAL_APPS = ["apps.core", "apps.users", "apps.login", "apps.infrastructure", "apps.pqrs", "apps.order", "apps.telemanagement"]
 
 INSTALLED_APPS = BASE_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
