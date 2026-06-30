@@ -23,6 +23,8 @@ Zone = apps.get_model('users', 'Zone')
 
 
 class SetOrder:
+    """Encapsula la construcción y persistencia de una orden de trabajo desde los parámetros del request."""
+
     def __init__(self, base_fields):
         self.base_fields = base_fields
 
@@ -52,6 +54,11 @@ class SetOrder:
 
 
 class OrderStatusChangeHandler:
+    """
+    Maneja transiciones de estado de una orden (activa o cerrada); valida condiciones, actualiza la
+    ruta y mueve a OrderClosed cuando el estado alcanza 4 (Cerrada) o 0 (Anulada).
+    """
+
     def __init__(self, instance):
         self.model_route = apps.get_model('order', f'{str(instance.__class__.__name__)}Route')
         self.instance = instance
@@ -88,6 +95,7 @@ class OrderStatusChangeHandler:
 
     @transaction.atomic
     def create_route(self, user, init_state, causal=None):
+        """Cierra la ruta anterior del estado init_state y abre una nueva para el estado actual."""
         last_route_instance = self.model_route.objects.filter(fk_ot=self.instance, state=init_state).order_by('-id').first()
         if last_route_instance:
             last_route_instance.output_date = datetime.now()
@@ -148,6 +156,13 @@ class OrderStatusChangeHandler:
 
 
 class OrderStatusChangeAPI(LoginRequiredMixin, View):
+    """
+    Cambia el estado de una orden (activa); si state=4 también la mueve a OrderClosed.
+
+    Métodos HTTP: POST (URL params: model, id, state)
+    Respuesta: JSON
+    """
+
     def post(self, request, *args, **kwargs):
         start_time = time.time()
         try:

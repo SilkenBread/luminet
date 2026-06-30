@@ -24,7 +24,10 @@ from django.utils.crypto import get_random_string
 
 class LoginFormView(LoginView):
     """
-    Vista basada en clase iniciar sesión
+    Formulario de inicio de sesión; redirige si el usuario ya está autenticado.
+
+    Métodos HTTP: GET, POST
+    Respuesta: HTML (login.html)
     """
     form_class = LoginForm
     template_name = 'login.html'
@@ -42,7 +45,10 @@ class LoginFormView(LoginView):
 
 class LogoutView(RedirectView):
     """
-    Vista basada en clase para cerrar sesión
+    Cierra la sesión activa y redirige al login.
+
+    Métodos HTTP: GET
+    Respuesta: Redirect → login:login
     """
     pattern_name = 'login:login'
 
@@ -52,7 +58,10 @@ class LogoutView(RedirectView):
     
 class CheckPasswordRecovery(FormView):
     """
-    Vista basada en clase para validar el usuario que quiere cambiar la contraseña
+    Solicita recuperación de contraseña; envía email con token de un solo uso almacenado en caché.
+
+    Métodos HTTP: GET, POST (JSON body: {username})
+    Respuesta: HTML (recovery_password.html) | JSON
     """
     form_class = ResetPasswordForm
     template_name = 'recovery_password.html'
@@ -106,7 +115,10 @@ class CheckPasswordRecovery(FormView):
     
 class ChangePasswordView(FormView):
     """
-    Vista basada en clase para cambiar la contraseña
+    Permite al usuario establecer una nueva contraseña usando el token del email de recuperación.
+
+    Métodos HTTP: GET, POST
+    Respuesta: HTML (change_password.html) | JSON
     """
     form_class = ChangePasswordForm
     template_name = 'change_password.html'
@@ -150,7 +162,10 @@ class ChangePasswordView(FormView):
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginWebView(View):
     """
-    Vista basada en clase para loguearse desde el web view
+    Autenticación JSON para clientes móviles/WebView; exento de CSRF.
+
+    Métodos HTTP: POST (form-data: username, password)
+    Respuesta: JSON
     """
     def post(self, request, *args, **kwargs):
         data = dict()

@@ -22,6 +22,8 @@ def _serialize_comuna(comuna):
 
 
 class ComunaSearchAllView(LoginRequiredMixin, View):
+    """Devuelve todas las comunas con polígono y punto central; requiere autenticación."""
+
     def get(self, request, *args, **kwargs):
         comunas = Comuna.objects.only("id", "name", "type", "centerPoint", "poly")
         data = [c for c in (_serialize_comuna(c) for c in comunas) if c]
@@ -29,6 +31,8 @@ class ComunaSearchAllView(LoginRequiredMixin, View):
 
 
 class ComunaSearchView(View):
+    """Devuelve comunas filtradas por lista de IDs separados por coma (parámetro ?comunas=); sin autenticación requerida."""
+
     def get(self, request, *args, **kwargs):
         params = request.GET.get("comunas")
         queryset = Comuna.objects.only("id", "name", "type", "centerPoint", "poly")

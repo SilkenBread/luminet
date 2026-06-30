@@ -26,6 +26,8 @@ def _serialize_district(district):
 
 
 class DistrictSearchView(View):
+    """Devuelve todos los barrios con geometría de polígono."""
+
     def get(self, request, *args, **kwargs):
         districts = District.objects.only(
             "id", "name", "estrato", "cod_unico", "poly", "fk_comuna_id"
@@ -35,6 +37,8 @@ class DistrictSearchView(View):
 
 
 class DistrictSearchByComuna(View):
+    """Devuelve barrios filtrados por ID de comuna."""
+
     def get(self, request, comuna, *args, **kwargs):
         comuna_obj = get_object_or_404(Comuna, pk=comuna)
         districts = District.objects.filter(fk_comuna=comuna_obj).only(

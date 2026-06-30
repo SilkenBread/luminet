@@ -130,10 +130,12 @@ class GenericPqrSearch(TemplateView):
 
 
 class PqrExternalSearchView(GenericPqrSearch):
+    """Búsqueda pública de PQR por número de radicado."""
     template_name = 'search/external.html'
 
 
 class PqrInternalSearchView(LoginRequiredMixin, GenericPqrSearch):
+    """Búsqueda interna (staff) de PQR por número de radicado."""
     template_name = 'search/internal.html'
 
     def get_context_data(self, **kwargs):

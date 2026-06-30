@@ -16,6 +16,13 @@ ENTITY = 'Usuarios'
 MODULE = 'Gestión de Usuarios'
 
 class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """
+    Lista paginada de usuarios; soporta DataTables server-side via GET AJAX.
+
+    Permisos: users.view_user
+    Métodos HTTP: GET, GET (AJAX)
+    Respuesta: HTML (user/list.html) | JSON
+    """
     model = User
     template_name = 'user/list.html'
     permission_required = ['users.view_user']
@@ -89,6 +96,13 @@ class UserListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView
 
 
 class UserCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, CreateView):
+    """
+    Formulario de creación de usuario; GET AJAX devuelve cuadrillas filtradas por área.
+
+    Permisos: users.add_user
+    Métodos HTTP: GET, POST
+    Respuesta: HTML (user/create.html) | JSON
+    """
     model = User
     form_class = UserForm
     template_name = 'user/create.html'
@@ -160,6 +174,13 @@ class UserCreateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, Create
 
 
 class UserUpdateView(LoginRequiredMixin, ValidatePermissionRequiredMixin, UpdateView):
+    """
+    Formulario de edición de usuario; GET AJAX devuelve cuadrillas filtradas por área.
+
+    Permisos: users.change_user
+    Métodos HTTP: GET, POST
+    Respuesta: HTML (user/edit.html) | JSON
+    """
     model = User
     form_class = UserUpdateForm
     template_name = 'user/edit.html'

@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.db.models import Q
 
 class ValidatePermissionRequiredMixin(AccessMixin):
+    """Mixin de permisos para vistas HTML; redirige al dashboard si el usuario no tiene acceso."""
     permission_required = []
 
     def get_perms(self):
@@ -51,6 +52,7 @@ class ValidatePermissionRequiredMixin(AccessMixin):
 
 
 class APIPermissionValidation(AccessMixin):
+    """Mixin de permisos para vistas API; devuelve JSON 401/403 si el usuario no tiene acceso."""
     permission_required = ''
 
     def get_perms(self):

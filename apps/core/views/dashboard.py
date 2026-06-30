@@ -3,6 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
 class DashboardView(LoginRequiredMixin, TemplateView):
+    """
+    Dashboard principal para usuarios autenticados; incluye conteo de usuarios activos.
+
+    Métodos HTTP: GET
+    Respuesta: HTML (dashboard.html)
+    """
     template_name = 'dashboard.html'
 
     def get_active_users(self):

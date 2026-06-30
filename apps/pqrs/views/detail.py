@@ -13,6 +13,13 @@ from ..models import PqrActive, PqrClosed
 
 
 class PqrDetailAPI(LoginRequiredMixin, APIPermissionValidation, View):
+    """
+    Devuelve el detalle completo de una PQR (activa o cerrada) junto con sus órdenes asociadas.
+
+    Permisos: pqrs.view_pqractive
+    Métodos HTTP: GET
+    Respuesta: JSON
+    """
     permission_required = ['pqrs.view_pqractive']
 
     def get(self, request, *args, **kwargs):

@@ -22,6 +22,13 @@ MODULE_NAME = 'Ordenes de Trabajo'
 
 
 class OrderActiveBase(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
+    """
+    Vista base para listas de órdenes activas; calcula tiempo restante y filtra cuadrillas por grupo.
+
+    Permisos: order.view_orderactive
+    Métodos HTTP: GET, POST (action=searchdata)
+    Respuesta: HTML | JSON
+    """
     model = OrderActive
     permission_required = ['order.view_orderactive']
 
@@ -141,7 +148,12 @@ class OrderActiveBase(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListV
 
 
 class OrderActiveListState1(OrderActiveBase):
-    """Por Asignar"""
+    """
+    Lista órdenes activas en estado 1 (Por Asignar).
+
+    Permisos: order.view_orderactive (inherited)
+    Respuesta: HTML (list/active_state1.html) | JSON
+    """
     template_name = 'list/active_state1.html'
     status = 1
 
@@ -152,7 +164,12 @@ class OrderActiveListState1(OrderActiveBase):
 
 
 class OrderActiveListState2(OrderActiveBase):
-    """En Terreno"""
+    """
+    Lista órdenes activas en estado 2 (En Terreno).
+
+    Permisos: order.view_orderactive (inherited)
+    Respuesta: HTML (list/active_state2.html) | JSON
+    """
     template_name = 'list/active_state2.html'
     status = 2
 
@@ -163,7 +180,12 @@ class OrderActiveListState2(OrderActiveBase):
 
 
 class OrderActiveListState3(OrderActiveBase):
-    """Validación"""
+    """
+    Lista órdenes activas en estado 3 (Validación); incluye causa de reasignación en cada fila.
+
+    Permisos: order.view_orderactive (inherited)
+    Respuesta: HTML (list/active_state3.html) | JSON
+    """
     template_name = 'list/active_state3.html'
     status = 3
 
@@ -197,7 +219,12 @@ class OrderActiveListState3(OrderActiveBase):
 
 
 class OrderClosedListState4(LoginRequiredMixin, ValidatePermissionRequiredMixin, ListView):
-    """Cerradas"""
+    """
+    Lista órdenes cerradas/anuladas (estado 4 o 0 según parámetro 'canceled').
+
+    Permisos: order.view_orderclosed
+    Respuesta: HTML (list/closed_state4.html) | JSON
+    """
     model = OrderClosed
     permission_required = ['order.view_orderclosed']
     template_name = 'list/closed_state4.html'

@@ -21,8 +21,11 @@ ENTITY = 'PQRs'
 
 class GenericPqrCreateView(TemplateView):
     """
-    VISTAS GENERICA PARA LA CREACION DE PQRs (EXTERNAS E INTERNAS)
-    """    
+    Vista base para la creación de PQRs; POST devuelve datos de dropdowns (tipo de daño, origen).
+
+    Métodos HTTP: GET, POST (action=getTypeDamage)
+    Respuesta: HTML | JSON
+    """
     def get_post_data(self, action):
         try:
             if action == 'getTypeDamage':
@@ -55,13 +58,15 @@ class GenericPqrCreateView(TemplateView):
         return context
 
 
-@method_decorator(csrf_exempt, name='dispatch') 
-class PqrCreateView(GenericPqrCreateView):    
+@method_decorator(csrf_exempt, name='dispatch')
+class PqrCreateView(GenericPqrCreateView):
+    """Formulario público de creación de PQR; exento de CSRF."""
     template_name = 'creation/external.html'
 
 
-@method_decorator(csrf_exempt, name='dispatch') 
+@method_decorator(csrf_exempt, name='dispatch')
 class PqrIntenalCreateView(LoginRequiredMixin, GenericPqrCreateView):
+    """Formulario interno de creación de PQR; filtra origen por el grupo del usuario autenticado."""
     template_name = 'creation/internal.html'
 
     def get_origin_data(self):

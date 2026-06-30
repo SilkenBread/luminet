@@ -122,6 +122,7 @@ class PqrStateBaseListView(LoginRequiredMixin, ValidatePermissionRequiredMixin, 
         return JsonResponse(data, safe=False)
 
 class PqrReceiveListView(PqrStateBaseListView):
+    """Lista PQRs en estado 1 (En Revisión)."""
     template_name = 'list/state1.html'
     status= 1
     
@@ -138,6 +139,7 @@ class PqrReceiveListView(PqrStateBaseListView):
 
 
 class PqrReviewListView(PqrStateBaseListView):
+    """Lista PQRs en estado 2 (En Revisión); filtra por presencia de órdenes con el parámetro with_orders."""
     template_name = 'list/state2.html'
     status = 2
 
@@ -198,6 +200,7 @@ class PqrReviewListView(PqrStateBaseListView):
 
 
 class PqrAtendedListView(PqrStateBaseListView):
+    """Lista PQRs cerradas de PqrClosed; estado 3 (atendidas) o 0 (anuladas) según parámetro 'canceled'."""
     model = PqrClosed
     template_name = 'list/state3.html'
     permission_required = ['pqrs.view_pqrclosed']

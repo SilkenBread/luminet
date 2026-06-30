@@ -20,6 +20,13 @@ from ..models import PqrActive, CauseRejectPqr
 
 
 class PqrRejectAPI(LoginRequiredMixin, APIPermissionValidation, View):
+    """
+    Anula una PQR: cambia estado a 0, envía email, anula órdenes asociadas y mueve a PqrClosed.
+
+    Permisos: pqrs.change_pqractive
+    Métodos HTTP: GET (lista causas) | POST (pqr=<id>, cause=<id>)
+    Respuesta: JSON
+    """
     permission_required = ['pqrs.change_pqractive']
 
     def _get_request_payload(self, request):

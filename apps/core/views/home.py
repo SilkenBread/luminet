@@ -1,6 +1,12 @@
 from django.views.generic import TemplateView
 
 class HomeView(TemplateView):
+    """
+    Página de inicio pública de Luminet.
+
+    Métodos HTTP: GET
+    Respuesta: HTML (home.html)
+    """
     template_name = 'home.html'
     
     def get_context_data(self, **kwargs):

@@ -74,6 +74,7 @@ class PqrStatusChangeHandler:
 
     @transaction.atomic
     def create_route(self, init_state, causal=None):
+        """Cierra la ruta anterior del estado init_state y abre una nueva ruta para el estado actual."""
         last_route_instance = self.model_route.objects \
             .filter(fk_pqr=self.instance, state=init_state) \
             .order_by('-id').first()
@@ -121,6 +122,13 @@ class PqrStatusChangeHandler:
 
 
 class PqrStatusChangeAPI(LoginRequiredMixin, APIPermissionValidation, View):
+    """
+    Cambia el estado de una PQR activa; delega validación y persistencia a PqrStatusChangeHandler.
+
+    Permisos: pqrs.change_pqractive
+    Métodos HTTP: POST (pqr=<id>, state=<int>)
+    Respuesta: JSON
+    """
     permission_required = ['pqrs.change_pqractive']
 
     def post(self, request, *args, **kwargs):

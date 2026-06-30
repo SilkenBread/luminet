@@ -38,6 +38,13 @@ def _parse_node_payload(request):
 
 
 class NodeCreateAPI(LoginRequiredMixin, APIPermissionValidation, View):
+    """
+    Crea un nodo validando que painting_code tenga exactamente 7 dígitos.
+
+    Permisos: infrastructure.add_node
+    Métodos HTTP: POST
+    Respuesta: JSON
+    """
     permission_required = ["infrastructure.add_node"]
 
     def post(self, request, *args, **kwargs):
@@ -63,6 +70,7 @@ class NodeUpdateAPI(LoginRequiredMixin, APIPermissionValidation, View):
     permission_required = ["infrastructure.change_node"]
 
     def get_perms(self):
+        """Retorna view_node para GET y change_node para POST."""
         if self.request.method == "GET":
             return ["infrastructure.view_node"]
         return list(self.permission_required)
@@ -94,6 +102,13 @@ class NodeUpdateAPI(LoginRequiredMixin, APIPermissionValidation, View):
 
 
 class NodeDeleteAPI(LoginRequiredMixin, APIPermissionValidation, View):
+    """
+    Elimina un nodo; devuelve 409 si tiene infraestructura asociada (ProtectedError).
+
+    Permisos: infrastructure.delete_node
+    Métodos HTTP: POST
+    Respuesta: JSON
+    """
     permission_required = ["infrastructure.delete_node"]
 
     def post(self, request, pk, *args, **kwargs):
